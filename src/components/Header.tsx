@@ -1,6 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { brandSize, brandSrc } from "@/content/art";
 import { cartCount } from "@/store/shop";
@@ -21,6 +22,8 @@ const LINKS = [
 
 export default function Header() {
   const { state, openDrawer } = useShop();
+  // Anchors live on the home page; elsewhere they lead back to it.
+  const home = usePathname() === "/" ? "" : "/";
   const count = cartCount(state.cart);
   const btn = useRef<HTMLButtonElement>(null);
   const prev = useRef(count);
@@ -89,12 +92,12 @@ export default function Header() {
           <path d={menu ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h11M4 17h16"} />
         </svg>
       </button>
-      <a href="#hero" className="markLink" aria-label="Playweary, back to the top">
+      <a href={home + "#hero"} className="markLink" aria-label="Playweary, back to the top">
         <img className="mark" src={brandSrc("logo_light", 380)} {...brandSize("logo_light")} alt="" />
       </a>
       <nav aria-label="Main" className="deskNav">
         {LINKS.map(([href, label]) => (
-          <a key={href} href={href}>
+          <a key={href} href={href.startsWith("#") ? home + href : href}>
             {label}
           </a>
         ))}
@@ -117,7 +120,7 @@ export default function Header() {
       <div id="mobileMenu" ref={menuEl} className={menu ? "open" : undefined} inert={!menu} role="dialog" aria-modal="true" aria-label="Menu">
         <nav aria-label="Menu">
           {LINKS.map(([href, label]) => (
-            <a key={href} href={href} onClick={() => setMenu(false)}>
+            <a key={href} href={href.startsWith("#") ? home + href : href} onClick={() => setMenu(false)}>
               {label}
             </a>
           ))}

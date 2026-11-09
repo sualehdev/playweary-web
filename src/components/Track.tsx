@@ -1,21 +1,17 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 /**
  * Order tracking: type a reference number, then watch the kit's character walk
  * the parcel along a storybook road, station by station. Prototype data only
  * (see lib/orders).
  */
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { brandSize, brandSrc } from "@/content/art";
 import { money, productById } from "@/content/products";
 import { shippingById } from "@/lib/checkout";
 import { confetti } from "@/lib/effects";
 import { gsap, reducedMotion } from "@/lib/motion";
 import {
-  DEMO_REFS,
   LAST_STAGE,
   STAGES,
   getOrder,
@@ -244,15 +240,6 @@ export default function Track() {
 
   return (
     <div className="coPage trPage">
-      <header className="coBar">
-        <Link href="/" aria-label="Playweary home">
-          <img src={brandSrc("logo_light", 380)} {...brandSize("logo_light")} alt="Playweary" className="coLogo" />
-        </Link>
-        <span className="coSecure">📦 Order tracker</span>
-        <Link className="coBack" href="/">
-          ← Back to Playweary
-        </Link>
-      </header>
 
       <main className="wrap coMain" id="main">
         <p className="eyebrow">Where&apos;s my kit?</p>
@@ -289,15 +276,10 @@ export default function Track() {
             </p>
           ) : (
             <p className="coSmall" id="tr-help">
-              Find it on your order confirmation. No order yet? Try a demo number:
+              Find it on your order confirmation.
             </p>
           )}
           <div className="trChips">
-            {DEMO_REFS.map((r) => (
-              <button key={r} type="button" className="trChip" onClick={() => lookup(r)}>
-                {r}
-              </button>
-            ))}
             {recent.slice(0, 3).map((o) => (
               <button key={o.number} type="button" className="trChip mine" onClick={() => lookup(o.number)}>
                 {o.number} · yours
@@ -356,9 +338,9 @@ export default function Track() {
             </div>
 
             <div className="trDemo card">
-              <p>
+              {/* <p>
                 <b>Prototype controls.</b> Real orders move on their own every few minutes. Skip ahead to see every stage.
-              </p>
+              </p> */}
               <div className="trDemoBtns">
                 <button type="button" className="btn sm" onClick={next} disabled={reached >= LAST_STAGE}>
                   Next stage
