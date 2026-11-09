@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 279.06 479.68">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ff2e60;
+      }
+
+      .cls-2 {
+        fill: #fcc003;
+        font-family: Raleway-Black, Raleway;
+        font-size: 69.56px;
+        font-weight: 800;
+      }
+
+      .cls-3 {
+        fill: #a03fff;
+      }
+    </style>
+  </defs>
+  <rect class="cls-3" x="36.15" y="49.3" width="208.52" height="401.32" rx="100.4" ry="100.4"/>
+  <g>
+    <path class="cls-1" d="M192.46,104.35c26.15-4.48,41.89,30.31,18.29,46.08-22.95,15.33-49.67-12.78-34.93-34.93,2.99-4.49,11.31-10.23,16.65-11.15Z"/>
+    <path class="cls-1" d="M81.36,127.23c29.56-5.31,42.98,35.17,16.24,47.28-36.06,16.32-50.69-41.09-16.24-47.28Z"/>
+    <path class="cls-1" d="M110.15,32.67c21.76-23.17,59.18,9.14,37.87,33.78-22.76,26.31-60.91-9.24-37.87-33.78Z"/>
+  </g>
+  <text class="cls-2" transform="translate(60.61 164.92) scale(.99 1)"><tspan x="0" y="0">Stick</tspan></text>
+</svg>

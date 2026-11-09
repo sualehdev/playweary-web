@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* The Playweary page styles itself end to end in ./playweary/playweary.css.
+   Tailwind stays available for anything built on top of it — its preflight
+   lives in @layer base, so the unlayered page styles always win. */

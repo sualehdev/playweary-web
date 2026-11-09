@@ -1,0 +1,966 @@
+{
+  "generatedBy": "scripts/build-assets.mjs",
+  "print": {
+    "w": 520,
+    "h": 669,
+    "cx": 53.56,
+    "charTop": 18.83,
+    "charBottom": 81.17
+  },
+  "characters": {
+    "boy": {
+      "base": {
+        "w": 1380,
+        "h": 3900,
+        "variants": [
+          {
+            "src": "art/boy/base-640.webp",
+            "w": 226,
+            "h": 640,
+            "bytes": 27626
+          },
+          {
+            "src": "art/boy/base-1280.webp",
+            "w": 453,
+            "h": 1280,
+            "bytes": 63966
+          }
+        ]
+      },
+      "pieces": {
+        "hair1": {
+          "id": "hair1",
+          "type": "hair",
+          "set": 1,
+          "name": "Surf Shades",
+          "z": 4,
+          "w": 1200,
+          "h": 939,
+          "slot": {
+            "cx": 53.56,
+            "cy": 25.4,
+            "w": 23,
+            "h": 13.99
+          },
+          "variants": [
+            {
+              "src": "art/boy/hair1-256.webp",
+              "w": 256,
+              "h": 200,
+              "bytes": 18198
+            },
+            {
+              "src": "art/boy/hair1-640.webp",
+              "w": 640,
+              "h": 501,
+              "bytes": 60132
+            }
+          ]
+        },
+        "hair2": {
+          "id": "hair2",
+          "type": "hair",
+          "set": 2,
+          "name": "Sky Goggles",
+          "z": 4,
+          "w": 919,
+          "h": 892,
+          "slot": {
+            "cx": 53.56,
+            "cy": 21,
+            "w": 23,
+            "h": 17.35
+          },
+          "variants": [
+            {
+              "src": "art/boy/hair2-256.webp",
+              "w": 256,
+              "h": 248,
+              "bytes": 23424
+            },
+            {
+              "src": "art/boy/hair2-640.webp",
+              "w": 640,
+              "h": 621,
+              "bytes": 77124
+            }
+          ]
+        },
+        "hair3": {
+          "id": "hair3",
+          "type": "hair",
+          "set": 3,
+          "name": "Cool Spikes",
+          "z": 4,
+          "w": 1002,
+          "h": 962,
+          "slot": {
+            "cx": 53.56,
+            "cy": 21.2,
+            "w": 23,
+            "h": 17.16
+          },
+          "variants": [
+            {
+              "src": "art/boy/hair3-256.webp",
+              "w": 256,
+              "h": 246,
+              "bytes": 18882
+            },
+            {
+              "src": "art/boy/hair3-640.webp",
+              "w": 640,
+              "h": 614,
+              "bytes": 66698
+            }
+          ]
+        },
+        "outfit1": {
+          "id": "outfit1",
+          "type": "outfit",
+          "set": 1,
+          "name": "Bolt Hoodie",
+          "z": 2,
+          "w": 1402,
+          "h": 1990,
+          "slot": {
+            "cx": 53.56,
+            "cy": 54.05,
+            "w": 35.58,
+            "h": 39.25
+          },
+          "variants": [
+            {
+              "src": "art/boy/outfit1-256.webp",
+              "w": 256,
+              "h": 363,
+              "bytes": 16080
+            },
+            {
+              "src": "art/boy/outfit1-640.webp",
+              "w": 640,
+              "h": 908,
+              "bytes": 56490
+            }
+          ]
+        },
+        "outfit2": {
+          "id": "outfit2",
+          "type": "outfit",
+          "set": 2,
+          "name": "Match Kit",
+          "z": 2,
+          "w": 1268,
+          "h": 1979,
+          "slot": {
+            "cx": 53.56,
+            "cy": 55.55,
+            "w": 35.58,
+            "h": 43.16
+          },
+          "variants": [
+            {
+              "src": "art/boy/outfit2-256.webp",
+              "w": 256,
+              "h": 400,
+              "bytes": 18716
+            },
+            {
+              "src": "art/boy/outfit2-640.webp",
+              "w": 640,
+              "h": 999,
+              "bytes": 58748
+            }
+          ]
+        },
+        "outfit3": {
+          "id": "outfit3",
+          "type": "outfit",
+          "set": 3,
+          "name": "Scout Shirt",
+          "z": 2,
+          "w": 1396,
+          "h": 1913,
+          "slot": {
+            "cx": 53.56,
+            "cy": 53.25,
+            "w": 35.58,
+            "h": 37.9
+          },
+          "variants": [
+            {
+              "src": "art/boy/outfit3-256.webp",
+              "w": 256,
+              "h": 351,
+              "bytes": 18810
+            },
+            {
+              "src": "art/boy/outfit3-640.webp",
+              "w": 640,
+              "h": 877,
+              "bytes": 60352
+            }
+          ]
+        },
+        "shoes1": {
+          "id": "shoes1",
+          "type": "shoes",
+          "set": 1,
+          "name": "Court Hi-Tops",
+          "z": 3,
+          "w": 1485,
+          "h": 529,
+          "slot": {
+            "cx": 53.56,
+            "cy": 78.36,
+            "w": 26.33,
+            "h": 7.29
+          },
+          "variants": [
+            {
+              "src": "art/boy/shoes1-256.webp",
+              "w": 256,
+              "h": 91,
+              "bytes": 7936
+            },
+            {
+              "src": "art/boy/shoes1-640.webp",
+              "w": 640,
+              "h": 228,
+              "bytes": 21626
+            }
+          ]
+        },
+        "shoes2": {
+          "id": "shoes2",
+          "type": "shoes",
+          "set": 2,
+          "name": "Turbo Trainers",
+          "z": 3,
+          "w": 1490,
+          "h": 523,
+          "slot": {
+            "cx": 53.56,
+            "cy": 78.36,
+            "w": 26.33,
+            "h": 7.18
+          },
+          "variants": [
+            {
+              "src": "art/boy/shoes2-256.webp",
+              "w": 256,
+              "h": 90,
+              "bytes": 7806
+            },
+            {
+              "src": "art/boy/shoes2-640.webp",
+              "w": 640,
+              "h": 225,
+              "bytes": 22452
+            }
+          ]
+        },
+        "shoes3": {
+          "id": "shoes3",
+          "type": "shoes",
+          "set": 3,
+          "name": "Trail Boots",
+          "z": 3,
+          "w": 1484,
+          "h": 594,
+          "slot": {
+            "cx": 53.56,
+            "cy": 78.36,
+            "w": 26.33,
+            "h": 8.19
+          },
+          "variants": [
+            {
+              "src": "art/boy/shoes3-256.webp",
+              "w": 256,
+              "h": 102,
+              "bytes": 8116
+            },
+            {
+              "src": "art/boy/shoes3-640.webp",
+              "w": 640,
+              "h": 256,
+              "bytes": 22362
+            }
+          ]
+        }
+      }
+    },
+    "girl": {
+      "base": {
+        "w": 1705,
+        "h": 3213,
+        "variants": [
+          {
+            "src": "art/girl/base-640.webp",
+            "w": 340,
+            "h": 640,
+            "bytes": 30058
+          },
+          {
+            "src": "art/girl/base-1280.webp",
+            "w": 679,
+            "h": 1280,
+            "bytes": 69562
+          }
+        ],
+        "bare": {
+          "w": 1705,
+          "h": 3213,
+          "variants": [
+            {
+              "src": "art/girl/base-bare-640.webp",
+              "w": 340,
+              "h": 640,
+              "bytes": 29544
+            },
+            {
+              "src": "art/girl/base-bare-1280.webp",
+              "w": 679,
+              "h": 1280,
+              "bytes": 67516
+            }
+          ]
+        }
+      },
+      "pieces": {
+        "hair1": {
+          "id": "hair1",
+          "type": "hair",
+          "set": 1,
+          "name": "Garden Hat",
+          "z": 4,
+          "w": 1132,
+          "h": 1124,
+          "slot": {
+            "cx": 53.56,
+            "cy": 28.49,
+            "w": 28.26,
+            "h": 21.81
+          },
+          "variants": [
+            {
+              "src": "art/girl/hair1-256.webp",
+              "w": 256,
+              "h": 254,
+              "bytes": 25188
+            },
+            {
+              "src": "art/girl/hair1-640.webp",
+              "w": 640,
+              "h": 635,
+              "bytes": 111754
+            }
+          ]
+        },
+        "hair2": {
+          "id": "hair2",
+          "type": "hair",
+          "set": 2,
+          "name": "Meadow Hat",
+          "z": 4,
+          "w": 1068,
+          "h": 1232,
+          "slot": {
+            "cx": 53.56,
+            "cy": 29.54,
+            "w": 26.66,
+            "h": 23.9
+          },
+          "variants": [
+            {
+              "src": "art/girl/hair2-256.webp",
+              "w": 256,
+              "h": 295,
+              "bytes": 31104
+            },
+            {
+              "src": "art/girl/hair2-640.webp",
+              "w": 640,
+              "h": 738,
+              "bytes": 138674
+            }
+          ]
+        },
+        "hair3": {
+          "id": "hair3",
+          "type": "hair",
+          "set": 3,
+          "name": "Denim Hat",
+          "z": 4,
+          "w": 1060,
+          "h": 1168,
+          "slot": {
+            "cx": 53.56,
+            "cy": 28.91,
+            "w": 26.46,
+            "h": 22.66
+          },
+          "variants": [
+            {
+              "src": "art/girl/hair3-256.webp",
+              "w": 256,
+              "h": 282,
+              "bytes": 28628
+            },
+            {
+              "src": "art/girl/hair3-640.webp",
+              "w": 640,
+              "h": 705,
+              "bytes": 126922
+            }
+          ]
+        },
+        "outfit1": {
+          "id": "outfit1",
+          "type": "outfit",
+          "set": 1,
+          "name": "Garden Gown",
+          "z": 2,
+          "w": 1839,
+          "h": 2303,
+          "slot": {
+            "cx": 54.36,
+            "cy": 54.42,
+            "w": 45.91,
+            "h": 44.68
+          },
+          "variants": [
+            {
+              "src": "art/girl/outfit1-256.webp",
+              "w": 256,
+              "h": 321,
+              "bytes": 21924
+            },
+            {
+              "src": "art/girl/outfit1-640.webp",
+              "w": 640,
+              "h": 801,
+              "bytes": 97062
+            }
+          ]
+        },
+        "outfit2": {
+          "id": "outfit2",
+          "type": "outfit",
+          "set": 2,
+          "name": "Meadow Top & Jeans",
+          "z": 2,
+          "w": 1093,
+          "h": 2329,
+          "slot": {
+            "cx": 53.56,
+            "cy": 55.27,
+            "w": 27.28,
+            "h": 45.19
+          },
+          "variants": [
+            {
+              "src": "art/girl/outfit2-256.webp",
+              "w": 256,
+              "h": 545,
+              "bytes": 33784
+            },
+            {
+              "src": "art/girl/outfit2-640.webp",
+              "w": 640,
+              "h": 1364,
+              "bytes": 165910
+            }
+          ]
+        },
+        "outfit3": {
+          "id": "outfit3",
+          "type": "outfit",
+          "set": 3,
+          "name": "Denim Day",
+          "z": 2,
+          "w": 1093,
+          "h": 1367,
+          "slot": {
+            "cx": 53.56,
+            "cy": 46.74,
+            "w": 27.28,
+            "h": 26.52
+          },
+          "variants": [
+            {
+              "src": "art/girl/outfit3-256.webp",
+              "w": 256,
+              "h": 320,
+              "bytes": 18268
+            },
+            {
+              "src": "art/girl/outfit3-640.webp",
+              "w": 640,
+              "h": 800,
+              "bytes": 78564
+            }
+          ]
+        },
+        "bag1": {
+          "id": "bag1",
+          "type": "bag",
+          "set": 1,
+          "name": "Garden Bag",
+          "z": 5,
+          "w": 527,
+          "h": 723,
+          "slot": {
+            "cx": 37.81,
+            "cy": 57.72,
+            "w": 14.47,
+            "h": 15.43
+          },
+          "variants": [
+            {
+              "src": "art/girl/bag1-256.webp",
+              "w": 256,
+              "h": 351,
+              "bytes": 24662
+            }
+          ]
+        },
+        "bag2": {
+          "id": "bag2",
+          "type": "bag",
+          "set": 2,
+          "name": "Meadow Bag",
+          "z": 5,
+          "w": 482,
+          "h": 647,
+          "slot": {
+            "cx": 37.81,
+            "cy": 56.9,
+            "w": 13.23,
+            "h": 13.81
+          },
+          "variants": [
+            {
+              "src": "art/girl/bag2-256.webp",
+              "w": 256,
+              "h": 344,
+              "bytes": 24510
+            }
+          ]
+        },
+        "bag3": {
+          "id": "bag3",
+          "type": "bag",
+          "set": 3,
+          "name": "Denim Bag",
+          "z": 5,
+          "w": 604,
+          "h": 627,
+          "slot": {
+            "cx": 37.81,
+            "cy": 56.69,
+            "w": 16.58,
+            "h": 13.38
+          },
+          "variants": [
+            {
+              "src": "art/girl/bag3-256.webp",
+              "w": 256,
+              "h": 266,
+              "bytes": 18684
+            }
+          ]
+        },
+        "shoes1": {
+          "id": "shoes1",
+          "type": "shoes",
+          "set": 1,
+          "name": "Cream Flats",
+          "z": 3,
+          "w": 796,
+          "h": 231,
+          "slot": {
+            "cx": 53.56,
+            "cy": 78.93,
+            "w": 19.87,
+            "h": 4.48
+          },
+          "variants": [
+            {
+              "src": "art/girl/shoes1-256.webp",
+              "w": 256,
+              "h": 74,
+              "bytes": 7496
+            },
+            {
+              "src": "art/girl/shoes1-640.webp",
+              "w": 640,
+              "h": 186,
+              "bytes": 22826
+            }
+          ]
+        },
+        "shoes2": {
+          "id": "shoes2",
+          "type": "shoes",
+          "set": 2,
+          "name": "Olive Flats",
+          "z": 3,
+          "w": 793,
+          "h": 219,
+          "slot": {
+            "cx": 53.56,
+            "cy": 79.05,
+            "w": 19.79,
+            "h": 4.25
+          },
+          "variants": [
+            {
+              "src": "art/girl/shoes2-256.webp",
+              "w": 256,
+              "h": 71,
+              "bytes": 7784
+            },
+            {
+              "src": "art/girl/shoes2-640.webp",
+              "w": 640,
+              "h": 177,
+              "bytes": 24286
+            }
+          ]
+        },
+        "shoes3": {
+          "id": "shoes3",
+          "type": "shoes",
+          "set": 3,
+          "name": "Court Sneakers",
+          "z": 3,
+          "w": 778,
+          "h": 370,
+          "slot": {
+            "cx": 53.56,
+            "cy": 77.58,
+            "w": 19.42,
+            "h": 7.18
+          },
+          "variants": [
+            {
+              "src": "art/girl/shoes3-256.webp",
+              "w": 256,
+              "h": 122,
+              "bytes": 9430
+            },
+            {
+              "src": "art/girl/shoes3-640.webp",
+              "w": 640,
+              "h": 304,
+              "bytes": 30506
+            }
+          ]
+        }
+      }
+    }
+  },
+  "brand": {
+    "logo_light": {
+      "w": 760,
+      "h": 361,
+      "variants": [
+        {
+          "src": "brand/logo_light-380.webp",
+          "w": 380,
+          "h": 181,
+          "bytes": 23732
+        },
+        {
+          "src": "brand/logo_light-760.webp",
+          "w": 760,
+          "h": 361,
+          "bytes": 49070
+        }
+      ]
+    },
+    "logo_dark": {
+      "w": 760,
+      "h": 361,
+      "variants": [
+        {
+          "src": "brand/logo_dark-380.webp",
+          "w": 380,
+          "h": 181,
+          "bytes": 23858
+        },
+        {
+          "src": "brand/logo_dark-760.webp",
+          "w": 760,
+          "h": 361,
+          "bytes": 47288
+        }
+      ]
+    },
+    "tee_print": {
+      "w": 520,
+      "h": 669,
+      "variants": [
+        {
+          "src": "brand/tee_print-520.webp",
+          "w": 520,
+          "h": 669,
+          "bytes": 22130
+        }
+      ],
+      "note": "boy print only, 520px wide: ask for a hi-res, plus a girl print"
+    }
+  },
+  "show": {
+    "boy": {
+      "src": "art/show/boy.webp",
+      "w": 327,
+      "h": 924,
+      "bytes": 63342
+    },
+    "girl": {
+      "src": "art/show/girl.webp",
+      "w": 490,
+      "h": 924,
+      "bytes": 68472
+    },
+    "girlBare": {
+      "src": "art/show/girlBare.webp",
+      "w": 490,
+      "h": 924,
+      "bytes": 66732
+    },
+    "boy-hair1": {
+      "src": "art/show/boy-hair1.webp",
+      "w": 240,
+      "h": 188,
+      "bytes": 39508
+    },
+    "boy-hair2": {
+      "src": "art/show/boy-hair2.webp",
+      "w": 240,
+      "h": 233,
+      "bytes": 51964
+    },
+    "boy-hair3": {
+      "src": "art/show/boy-hair3.webp",
+      "w": 240,
+      "h": 230,
+      "bytes": 43256
+    },
+    "boy-outfit1": {
+      "src": "art/show/boy-outfit1.webp",
+      "w": 240,
+      "h": 341,
+      "bytes": 34640
+    },
+    "boy-outfit2": {
+      "src": "art/show/boy-outfit2.webp",
+      "w": 240,
+      "h": 375,
+      "bytes": 37936
+    },
+    "boy-outfit3": {
+      "src": "art/show/boy-outfit3.webp",
+      "w": 240,
+      "h": 329,
+      "bytes": 39414
+    },
+    "boy-shoes1": {
+      "src": "art/show/boy-shoes1.webp",
+      "w": 240,
+      "h": 86,
+      "bytes": 15412
+    },
+    "boy-shoes2": {
+      "src": "art/show/boy-shoes2.webp",
+      "w": 240,
+      "h": 85,
+      "bytes": 15472
+    },
+    "boy-shoes3": {
+      "src": "art/show/boy-shoes3.webp",
+      "w": 240,
+      "h": 96,
+      "bytes": 15790
+    },
+    "girl-hair1": {
+      "src": "art/show/girl-hair1.webp",
+      "w": 240,
+      "h": 238,
+      "bytes": 65038
+    },
+    "girl-hair2": {
+      "src": "art/show/girl-hair2.webp",
+      "w": 240,
+      "h": 277,
+      "bytes": 80108
+    },
+    "girl-hair3": {
+      "src": "art/show/girl-hair3.webp",
+      "w": 240,
+      "h": 265,
+      "bytes": 73874
+    },
+    "girl-outfit1": {
+      "src": "art/show/girl-outfit1.webp",
+      "w": 240,
+      "h": 301,
+      "bytes": 56844
+    },
+    "girl-outfit2": {
+      "src": "art/show/girl-outfit2.webp",
+      "w": 240,
+      "h": 512,
+      "bytes": 95768
+    },
+    "girl-outfit3": {
+      "src": "art/show/girl-outfit3.webp",
+      "w": 240,
+      "h": 300,
+      "bytes": 47904
+    },
+    "girl-bag1": {
+      "src": "art/show/girl-bag1.webp",
+      "w": 128,
+      "h": 176,
+      "bytes": 24160
+    },
+    "girl-bag2": {
+      "src": "art/show/girl-bag2.webp",
+      "w": 128,
+      "h": 172,
+      "bytes": 24342
+    },
+    "girl-bag3": {
+      "src": "art/show/girl-bag3.webp",
+      "w": 128,
+      "h": 133,
+      "bytes": 18524
+    },
+    "girl-shoes1": {
+      "src": "art/show/girl-shoes1.webp",
+      "w": 240,
+      "h": 70,
+      "bytes": 15154
+    },
+    "girl-shoes2": {
+      "src": "art/show/girl-shoes2.webp",
+      "w": 240,
+      "h": 67,
+      "bytes": 16166
+    },
+    "girl-shoes3": {
+      "src": "art/show/girl-shoes3.webp",
+      "w": 240,
+      "h": 114,
+      "bytes": 19768
+    }
+  },
+  "decor": {
+    "loop-arrow": {
+      "src": "art/decor/loop-arrow.svg",
+      "w": 373.99,
+      "h": 250.69,
+      "usesText": false
+    },
+    "squiggle-green-lg": {
+      "src": "art/decor/squiggle-green-lg.svg",
+      "w": 277.09,
+      "h": 275.74,
+      "usesText": false
+    },
+    "tag-rip": {
+      "src": "art/decor/tag-rip.svg",
+      "w": 279.06,
+      "h": 479.68,
+      "usesText": true
+    },
+    "tag-stick": {
+      "src": "art/decor/tag-stick.svg",
+      "w": 279.06,
+      "h": 479.68,
+      "usesText": true
+    },
+    "tag-play": {
+      "src": "art/decor/tag-play.svg",
+      "w": 279.06,
+      "h": 479.68,
+      "usesText": true
+    },
+    "quote-bubble": {
+      "src": "art/decor/quote-bubble.svg",
+      "w": 623.65,
+      "h": 237.68,
+      "usesText": false
+    },
+    "squiggle-green-sm": {
+      "src": "art/decor/squiggle-green-sm.svg",
+      "w": 587.71,
+      "h": 354.36,
+      "usesText": false
+    },
+    "dots-pink-sm": {
+      "src": "art/decor/dots-pink-sm.svg",
+      "w": 587.71,
+      "h": 354.36,
+      "usesText": false
+    },
+    "sky-gradient": {
+      "src": "art/decor/sky-gradient.svg",
+      "w": 1103.03,
+      "h": 4728.02,
+      "usesText": false
+    },
+    "squiggle-yellow-sm": {
+      "src": "art/decor/squiggle-yellow-sm.svg",
+      "w": 587.71,
+      "h": 354.36,
+      "usesText": false
+    },
+    "wave-yellow": {
+      "src": "art/decor/wave-yellow.svg",
+      "w": 1382.85,
+      "h": 586.94,
+      "usesText": false
+    },
+    "dots-multi-sm": {
+      "src": "art/decor/dots-multi-sm.svg",
+      "w": 592.03,
+      "h": 199.37,
+      "usesText": true
+    },
+    "hamburger": {
+      "src": "art/decor/hamburger.svg",
+      "w": 174.02,
+      "h": 161.14,
+      "usesText": false
+    },
+    "squiggle-green-xs": {
+      "src": "art/decor/squiggle-green-xs.svg",
+      "w": 174.02,
+      "h": 161.14,
+      "usesText": false
+    },
+    "cart-badge": {
+      "src": "art/decor/cart-badge.svg",
+      "w": 174.02,
+      "h": 161.14,
+      "usesText": true
+    },
+    "confetti": {
+      "src": "art/decor/confetti.svg",
+      "w": 378.12,
+      "h": 406.21,
+      "usesText": false
+    },
+    "dots-pink-lg": {
+      "src": "art/decor/dots-pink-lg.svg",
+      "w": 233.36,
+      "h": 250.69,
+      "usesText": false
+    }
+  }
+}
