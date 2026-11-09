@@ -17,8 +17,8 @@ import {
   getOrder,
   listOrders,
   normalizeRef,
-  setSkew,
-  skewFor,
+  // setSkew, // used by the demo controls (off for now)
+  // skewFor,
   stageAt,
   timeline,
   type TrackedOrder,
@@ -209,6 +209,7 @@ export default function Track() {
     return () => clearInterval(t);
   }, [order]);
 
+  /* Demo "Next stage" / "Start over" handlers, switched off with the buttons:
   const next = () => {
     if (!order || reached >= LAST_STAGE) return;
     const idx = reached + 1;
@@ -223,6 +224,7 @@ export default function Track() {
     setReached(0);
     setPicked(0);
   };
+  */
 
   const events = order ? timeline(order, reached) : [];
   const ev = events[picked];
@@ -337,10 +339,11 @@ export default function Track() {
               <OrderCard order={order} />
             </div>
 
+            {/* Prototype controls, switched off for now:
             <div className="trDemo card">
-              {/* <p>
+              <p>
                 <b>Prototype controls.</b> Real orders move on their own every few minutes. Skip ahead to see every stage.
-              </p> */}
+              </p>
               <div className="trDemoBtns">
                 <button type="button" className="btn sm" onClick={next} disabled={reached >= LAST_STAGE}>
                   Next stage
@@ -350,6 +353,7 @@ export default function Track() {
                 </button>
               </div>
             </div>
+            */}
           </section>
         ) : null}
       </main>
