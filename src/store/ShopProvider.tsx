@@ -11,12 +11,17 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from "react";
 import type { CharacterId } from "@/content/characters";
+import { PRODUCTS, type Product } from "@/content/products";
+import { applyCatalog, type Catalog } from "@/lib/catalog";
 import { initialShopState, ownedSets, shopReducer, type ShopState } from "./shop";
 
 const KEY = "playweary:shop:v1";
 
 type Api = {
   state: ShopState;
+  /** The catalogue with live price/availability applied (static fallback if the API is down). */
+  products: Product[];
+  productById: (id: string) => Product | undefined;
   isOwned: (setId: string) => boolean;
   add: (id: string, size: string, qty?: number) => void;
   setQty: (id: string, size: string, q: number) => void;
@@ -28,8 +33,10 @@ type Api = {
 
 const ShopContext = createContext<Api | null>(null);
 
-export function ShopProvider({ children }: { children: React.ReactNode }) {
+export function ShopProvider({ children, catalog }: { children: React.ReactNode; catalog?: Catalog | null }) {
   const [state, dispatch] = useReducer(shopReducer, undefined, initialShopState);
+  const products = useMemo(() => applyCatalog(PRODUCTS, catalog), [catalog]);
+  const productById = useCallback((id: string) => products.find((p) => p.id === id), [products]);
 
   useEffect(() => {
     let saved = {};
@@ -64,6 +71,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const api = useMemo<Api>(
     () => ({
       state,
+      products,
+      productById,
       isOwned: (setId) => owned.has(setId),
       add,
       setQty,
@@ -72,7 +81,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       openDrawer,
       closeDrawer,
     }),
-    [state, owned, add, setQty, clear, setCharacter, openDrawer, closeDrawer]
+    [state, products, productById, owned, add, setQty, clear, setCharacter, openDrawer, closeDrawer]
   );
 
   return <ShopContext.Provider value={api}>{children}</ShopContext.Provider>;

@@ -1,11 +1,14 @@
 /**
- * Prototype order store and tracking model. Everything is dummy data: orders
- * live in this browser's localStorage and their journey is derived from the
- * time since they were placed (compressed to minutes so a demo moves). A real
- * order API and courier feed replace `getOrder` / `stageAt` / `timeline`.
+ * Order tracking against the Playweary API.
+ *
+ * Two ways in: the private tracking code from the confirmation screen and
+ * emails (/track?code=PWT-…), or the order number plus the email used at
+ * checkout. The stage comes from the order's real status, set by the store
+ * team in the admin portal; `timeline` lays the server's events over the
+ * five storybook stages the page draws.
  */
 
-import type { PlacedOrder } from "./checkout";
+import { api, cents } from "./api";
 
 export type StageId = "placed" | "packed" | "shipped" | "out" | "delivered";
 
@@ -14,133 +17,157 @@ export type Stage = {
   label: string;
   /** Kid-friendly line shown when this stage is the current one. */
   blurb: string;
-  /** Minutes after the order was placed that this stage begins (demo time). */
-  at: number;
   where: string;
   note: string;
 };
 
 export const STAGES: Stage[] = [
-  { id: "placed", label: "Order placed", blurb: "We got your order and Pip is already doing a happy dance.", at: 0, where: "Playweary HQ", note: "Order confirmed and payment method noted." },
-  { id: "packed", label: "Packed", blurb: "Your kit is folded, tucked and tied up with a bow.", at: 2, where: "Playweary workshop", note: "Shirt and all three sets packed in a recycled box." },
-  { id: "shipped", label: "Shipped", blurb: "Your parcel is off on a big adventure down the road.", at: 6, where: "Regional sorting hub", note: "Handed to the courier and scanned at the hub." },
-  { id: "out", label: "Out for delivery", blurb: "Nearly there! The courier is heading to your street.", at: 12, where: "Local delivery van", note: "On the van with your name on it." },
-  { id: "delivered", label: "Delivered", blurb: "Knock knock! Your kit has arrived. Time to play!", at: 20, where: "Your front door", note: "Handed over at the address on the order." },
+  { id: "placed", label: "Order placed", blurb: "We got your order and Pip is already doing a happy dance.", where: "Playweary HQ", note: "Order received and payment method noted." },
+  { id: "packed", label: "Packed", blurb: "Your kit is folded, tucked and tied up with a bow.", where: "Playweary workshop", note: "Shirt and all three sets packed in a recycled box." },
+  { id: "shipped", label: "Shipped", blurb: "Your parcel is off on a big adventure down the road.", where: "With the courier", note: "Handed to the courier." },
+  { id: "out", label: "Out for delivery", blurb: "Nearly there! The courier is heading to your street.", where: "Local delivery van", note: "On the van with your name on it." },
+  { id: "delivered", label: "Delivered", blurb: "Knock knock! Your kit has arrived. Time to play!", where: "Your front door", note: "Handed over at the address on the order." },
 ];
 
 export const LAST_STAGE = STAGES.length - 1;
 
-export type TrackedOrder = PlacedOrder & {
-  /** Minutes added to the clock by the demo "Next stage" button. */
-  skew?: number;
-  /** Demo orders hold one stage for ever. */
-  frozen?: number;
-  demo?: boolean;
+export type OrderStatus = "PENDING" | "CONFIRMED" | "PACKED" | "SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+
+export type TrackedLine = { id: string; name: string; size: string; q: number; unitPrice: number; lineTotal: number };
+
+/** GET /v1/track/:code (money converted to dollars). */
+export type TrackedOrder = {
+  number: string;
+  trackingCode: string;
+  status: OrderStatus;
+  stage: StageId | "cancelled";
+  placedAt: string;
+  /** Masked, e.g. j***e@example.com */
+  email: string;
+  shipTo: { firstName: string; city: string; state: string };
+  shipping: "standard" | "express";
+  payment: "cod" | "paypal";
+  paymentStatus: "UNPAID" | "PAID" | "REFUNDED";
+  lines: TrackedLine[];
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+  arrives: [string, string];
+  isBackorder: boolean;
+  carrier: string | null;
+  carrierTrackingNumber: string | null;
+  timeline: { status: OrderStatus; stage: StageId | "cancelled"; message: string | null; at: string }[];
 };
 
-const KEY = "playweary:orders:v1";
+type TrackResponse = Omit<TrackedOrder, "lines" | "subtotal" | "shippingCost" | "total"> & {
+  lines: (Omit<TrackedLine, "unitPrice" | "lineTotal"> & { unitPriceCents: number; lineTotalCents: number })[];
+  subtotalCents: number;
+  shippingCents: number;
+  totalCents: number;
+};
 
-/** "pw 100001", "PW-100001" and "100001" all mean PW-100001. */
+function fromResponse(r: TrackResponse): TrackedOrder {
+  const { subtotalCents, shippingCents, totalCents, lines, ...rest } = r;
+  return {
+    ...rest,
+    lines: lines.map(({ unitPriceCents, lineTotalCents, ...l }) => ({ ...l, unitPrice: cents(unitPriceCents), lineTotal: cents(lineTotalCents) })),
+    subtotal: cents(subtotalCents),
+    shippingCost: cents(shippingCents),
+    total: cents(totalCents),
+  };
+}
+
+/* ------------------------------------------------------------- references -- */
+
+/** "pw 100100", "PW-100100" and "100100" all mean PW-100100. */
 export function normalizeRef(input: string): string | null {
   const m = input.trim().toUpperCase().match(/^(?:PW)?[\s-]*(\d{6})$/);
   return m ? `PW-${m[1]}` : null;
 }
 
-function readAll(): TrackedOrder[] {
+export const TRACKING_CODE_RE = /^PWT-[0-9A-HJKMNP-TV-Z]{12}$/;
+
+export function normalizeCode(input: string): string | null {
+  const c = input.trim().toUpperCase();
+  return TRACKING_CODE_RE.test(c) ? c : null;
+}
+
+/* --------------------------------------------------------------- fetching -- */
+
+export async function trackByCode(code: string): Promise<TrackedOrder> {
+  return fromResponse(await api<TrackResponse>(`/v1/track/${encodeURIComponent(code)}`));
+}
+
+export async function trackByNumber(number: string, email: string): Promise<TrackedOrder> {
+  return fromResponse(await api<TrackResponse>("/v1/track/lookup", { method: "POST", body: { number, email } }));
+}
+
+/* ------------------------------------------- orders placed in this browser -- */
+
+/** Only what is needed to reopen tracking: no address, email or phone is kept. */
+export type RecentOrder = { number: string; trackingCode: string; placedAt: string };
+
+const KEY = "playweary:orders:v2";
+const LEGACY_KEY = "playweary:orders:v1"; // prototype store with full addresses
+
+export function listOrders(): RecentOrder[] {
   try {
-    const raw = localStorage.getItem(KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as TrackedOrder[]).filter((o) => o && typeof o.number === "string") : [];
+    localStorage.removeItem(LEGACY_KEY);
+    const parsed: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed)
+      ? (parsed as RecentOrder[]).filter((o) => o && typeof o.number === "string" && typeof o.trackingCode === "string")
+      : [];
   } catch {
     return [];
   }
 }
 
-function writeAll(orders: TrackedOrder[]) {
+export function rememberOrder(o: RecentOrder) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(orders.slice(0, 20)));
+    const next = [{ number: o.number, trackingCode: o.trackingCode, placedAt: o.placedAt }, ...listOrders().filter((x) => x.number !== o.number)];
+    localStorage.setItem(KEY, JSON.stringify(next.slice(0, 10)));
   } catch {
-    /* storage unavailable: tracking still works for this tab */
+    /* storage unavailable: the tracking link in the email still works */
   }
 }
 
-export const listOrders = () => readAll();
+/* --------------------------------------------------------------- timeline -- */
 
-export function saveOrder(order: PlacedOrder) {
-  writeAll([order, ...readAll().filter((o) => o.number !== order.number)]);
+/** Index into STAGES that the order has reached (cancelled orders stay at 0). */
+export function stageIndex(order: Pick<TrackedOrder, "stage">): number {
+  const i = STAGES.findIndex((s) => s.id === order.stage);
+  return i < 0 ? 0 : i;
 }
 
-export function setSkew(number: string, skew: number) {
-  writeAll(readAll().map((o) => (o.number === number ? { ...o, skew } : o)));
-}
+export type TimelineEvent = Stage & { index: number; done: boolean; current: boolean; time: Date | null };
 
-export function demoOrders(now = new Date()): TrackedOrder[] {
-  const base = {
-    email: "demo@playweary.com",
-    phone: "(555) 010-0000",
-    shipping: "standard" as const,
-    payment: "cod" as const,
-    subtotal: 40,
-    shippingCost: 0,
-    total: 40,
-    demo: true,
-  };
-  const mk = (n: string, frozen: number, first: string, size: string, character: "boy" | "girl", city: string, state: string, zip: string): TrackedOrder => {
-    const placed = new Date(now.getTime() - (frozen + 1) * 86_400_000);
+/** The five stages with real times from the order's events, and courier details on "shipped". */
+export function timeline(order: TrackedOrder, reached = stageIndex(order)): TimelineEvent[] {
+  return STAGES.map((s, index) => {
+    const events = order.timeline.filter((e) => e.stage === s.id);
+    const first = events[0];
+    const latest = events[events.length - 1];
+    let note = latest?.message ?? s.note;
+    let label = s.label;
+    if (s.id === "placed") {
+      const confirmed = events.some((e) => e.status === "CONFIRMED");
+      label = confirmed || reached > 0 ? "Order confirmed" : "Order placed";
+      if (!confirmed && reached === 0) note = "We'll confirm your order shortly by email or phone.";
+    }
+    if (s.id === "shipped" && order.carrierTrackingNumber) {
+      note = `${order.carrier ?? "Courier"} tracking number ${order.carrierTrackingNumber}.`;
+    }
     return {
-      ...base,
-      number: n,
-      frozen,
-      placedAt: placed.toISOString(),
-      address: { firstName: first, lastName: "Demo", line1: "12 Rainbow Lane", line2: "", city, state, zip },
-      lines: [{ id: character === "boy" ? "kit-boy" : "kit-girl", size, q: 1 }],
-      arrives: [new Date(now.getTime() + 2 * 86_400_000).toISOString(), new Date(now.getTime() + 4 * 86_400_000).toISOString()],
-    } as TrackedOrder;
-  };
-  return [
-    mk("PW-100001", 1, "Maya", "4T", "girl", "Austin", "TX", "73301"),
-    mk("PW-100002", 2, "Leo", "5", "boy", "Portland", "OR", "97201"),
-    mk("PW-100003", 4, "Ava", "6", "girl", "Denver", "CO", "80201"),
-    mk("PW-100004", 3, "Noah", "3T", "boy", "Chicago", "IL", "60601"),
-  ];
-}
-
-export const DEMO_REFS = ["PW-100001", "PW-100002", "PW-100003", "PW-100004"] as const;
-
-/** Looks up an order by any spelling of its reference. Browser only. */
-export function getOrder(input: string, now = new Date()): TrackedOrder | null {
-  const ref = normalizeRef(input);
-  if (!ref) return null;
-  return readAll().find((o) => o.number === ref) ?? demoOrders(now).find((o) => o.number === ref) ?? null;
-}
-
-/** Index into STAGES that the order has reached. */
-export function stageAt(order: TrackedOrder, now = new Date()): number {
-  if (order.frozen !== undefined) return Math.min(LAST_STAGE, Math.max(0, order.frozen));
-  const minutes = (now.getTime() - new Date(order.placedAt).getTime()) / 60_000 + (order.skew ?? 0);
-  let idx = 0;
-  STAGES.forEach((s, i) => {
-    if (minutes >= s.at) idx = i;
+      ...s,
+      label,
+      note,
+      index,
+      done: index <= reached,
+      current: index === reached,
+      time: first ? new Date(first.at) : null,
+    };
   });
-  return idx;
 }
 
-/** Skew (minutes) that puts the order exactly at the start of stage `idx`. */
-export function skewFor(order: TrackedOrder, idx: number, now = new Date()): number {
-  const elapsed = (now.getTime() - new Date(order.placedAt).getTime()) / 60_000;
-  return STAGES[Math.min(LAST_STAGE, idx)].at - elapsed + 0.01;
-}
-
-export type TimelineEvent = Stage & { index: number; done: boolean; current: boolean; time: Date };
-
-export function timeline(order: TrackedOrder, reached: number): TimelineEvent[] {
-  const placed = new Date(order.placedAt).getTime();
-  return STAGES.map((s, index) => ({
-    ...s,
-    index,
-    done: index <= reached,
-    current: index === reached,
-    // Real calendar time: each stage a few hours apart, so it reads like a real feed.
-    time: new Date(placed + [0, 2, 20, 30, 52][index] * 3_600_000),
-  }));
-}
+/** Orders still moving are re-checked while the page is open. */
+export const isFinal = (o: Pick<TrackedOrder, "status">) => o.status === "DELIVERED" || o.status === "CANCELLED";

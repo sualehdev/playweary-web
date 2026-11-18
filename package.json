@@ -10,7 +10,7 @@
     "assets": "node scripts/build-assets.mjs",
     "frames": "node scripts/build-frames.mjs",
     "puzzle": "node scripts/build-puzzle.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },

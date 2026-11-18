@@ -31,7 +31,7 @@ import {
   type SlotType,
   type Worn,
 } from "@/content/characters";
-import { DEFAULT_SIZE, SIZES, kitId, money, productById } from "@/content/products";
+import { DEFAULT_SIZE, SIZES, kitId, money } from "@/content/products";
 import { flyToCart } from "@/lib/effects";
 import { Draggable, gsap, reducedMotion, useGSAP } from "@/lib/motion";
 import { useShop } from "@/store/ShopProvider";
@@ -275,7 +275,7 @@ function LeavingPiece({ item, onDone }: { item: Leaving; onDone: () => void }) {
 /* ----------------------------------------------------------- the bench -- */
 
 export default function Bench() {
-  const { state, isOwned, add, openDrawer } = useShop();
+  const { state, isOwned, add, openDrawer, productById } = useShop();
   const character = state.character;
   const def = CHARACTERS[character];
 
@@ -425,7 +425,9 @@ export default function Bench() {
   // character's kit, which ships with every piece on the bench.
   const [size, setSize] = useState(DEFAULT_SIZE);
   const kit = productById(kitId(character))!;
+  const canBuy = kit.available !== false;
   const addKit = (from: Element) => {
+    if (!canBuy) return;
     add(kit.id, size);
     flyToCart(from);
     openDrawer();
@@ -503,7 +505,9 @@ export default function Bench() {
                   <h3>{kit.name}</h3>
                   <p>{kit.sub}. {kit.looks}.</p>
                 </div>
-                <b className="buyPrice">{money(kit.price)}</b>
+                <b className="buyPrice">
+                  {kit.was ? <s>{money(kit.was)}</s> : null} {money(kit.price)}
+                </b>
               </div>
               <div className="sizeRow">
                 <span id="sizeLabel">Size</span>
@@ -526,9 +530,14 @@ export default function Bench() {
                   Size guide
                 </a>
               </div>
-              <button className="btn wide" id="addLook" type="button" onClick={(e) => addKit(e.currentTarget)}>
-                Add to cart · {money(kit.price)}
+              <button className="btn wide" id="addLook" type="button" disabled={!canBuy} onClick={(e) => addKit(e.currentTarget)}>
+                {canBuy ? `Add to cart · ${money(kit.price)}` : "Not available right now"}
               </button>
+              {canBuy && kit.backorder ? (
+                <p className="buyNote" role="note">
+                  {kit.backorderNote || "On backorder: order now and we'll ship it as soon as it's back, a little later than usual."}
+                </p>
+              ) : null}
             </div>
             <div
               style={{

@@ -17,7 +17,7 @@ Edit the file named in each row; nothing else needs to change.
 | Vector logo | `public/brand/*.webp` | Currently 760 px raster |
 | "The swap" frames | `public/frames/swap-NNNN-{960,1280}.webp`, count in `src/content/swap.ts` | Currently baked from placeholder art (`npm run frames`) |
 | Mascot (Pip) | `src/components/Jigsaw.tsx` | Drawn in code; swap in the illustrator's fox |
-| Checkout | `src/lib/checkout.ts` | Says checkout is not open yet |
+| Checkout | `src/lib/checkout.ts`, `.env.local` | Live against the Playweary API (`NEXT_PUBLIC_API_URL`, `REVALIDATE_SECRET`); cash on delivery only, PayPal comes last |
 | Newsletter | `src/lib/newsletter.ts` | Validates; sends nowhere yet |
 | Privacy and terms pages | not written | Needed before collecting emails |
 | Rip / Stick / Play tag SVGs, cart badge | `public/art/decor/` | Use live text in Raleway; not used on the page yet |

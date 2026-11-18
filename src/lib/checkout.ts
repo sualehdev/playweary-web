@@ -1,14 +1,15 @@
 /**
  * The seams between the checkout page and the outside world.
  *
- * Nothing here talks to a server yet. `placeOrder` is where an order API goes
- * (today it saves the order in this browser so it can be tracked). PayPal is
- * switched off until launch, so cash on delivery is the only live method.
+ * `placeOrder` sends the order to the Playweary API, which re-prices it,
+ * reserves stock and emails the customer. PayPal is switched off until
+ * launch, so cash on delivery is the only live method.
  */
 
 import { productById } from "@/content/products";
 import type { CartLine } from "@/store/shop";
-import { DEMO_REFS, listOrders, saveOrder } from "./orders";
+import { api, cents } from "./api";
+import { rememberOrder } from "./orders";
 
 export type ShippingMethod = { id: "standard" | "express"; name: string; days: [number, number]; price: number };
 
@@ -38,18 +39,29 @@ export type Order = {
   lines: CartLine[];
 };
 
-export type PlacedOrder = Order & {
+/** A line as the server priced it. */
+export type PlacedLine = CartLine & { name: string; unitPrice: number; lineTotal: number };
+
+export type PlacedOrder = Omit<Order, "lines"> & {
   number: string;
+  /** Private code for the tracking link (/track?code=…). */
+  trackingCode: string;
+  status: string;
   placedAt: string;
+  lines: PlacedLine[];
   subtotal: number;
   shippingCost: number;
   total: number;
   /** Earliest and latest delivery dates, ISO. */
   arrives: [string, string];
+  isBackorder: boolean;
 };
 
-export const orderSubtotal = (lines: CartLine[]) =>
-  lines.reduce((sum, l) => sum + (productById(l.id)?.price ?? 0) * l.q, 0);
+/** Pass `useShop().productById` for live prices; a placed line carries its own price. */
+export const orderSubtotal = (
+  lines: (CartLine & { unitPrice?: number })[],
+  lookup: (id: string) => { price: number } | undefined = productById
+) => lines.reduce((sum, l) => sum + (l.unitPrice ?? lookup(l.id)?.price ?? 0) * l.q, 0);
 
 export const shippingById = (id: ShippingMethod["id"]) => SHIPPING.find((s) => s.id === id) ?? SHIPPING[0];
 
@@ -65,29 +77,49 @@ export function addBusinessDays(from: Date, days: number) {
   return d;
 }
 
-/** A fresh PW-###### reference that no stored order already uses. */
-export function orderNumber(taken: string[] = listOrders().map((o) => o.number), rand: () => number = Math.random) {
-  for (;;) {
-    const n = "PW-" + Math.floor(100000 + rand() * 900000);
-    if (!taken.includes(n) && !DEMO_REFS.includes(n as (typeof DEMO_REFS)[number])) return n;
-  }
+/** POST /v1/orders response (money in cents). */
+type PlacedOrderResponse = Omit<PlacedOrder, "lines" | "subtotal" | "shippingCost" | "total"> & {
+  lines: (CartLine & { name: string; unitPriceCents: number; lineTotalCents: number })[];
+  subtotalCents: number;
+  shippingCents: number;
+  totalCents: number;
+};
+
+export function fromResponse(r: PlacedOrderResponse): PlacedOrder {
+  const { subtotalCents, shippingCents, totalCents, lines, ...rest } = r;
+  return {
+    ...rest,
+    lines: lines.map(({ unitPriceCents, lineTotalCents, ...l }) => ({
+      ...l,
+      unitPrice: cents(unitPriceCents),
+      lineTotal: cents(lineTotalCents),
+    })),
+    subtotal: cents(subtotalCents),
+    shippingCost: cents(shippingCents),
+    total: cents(totalCents),
+  };
 }
 
-/** Places the order. Today it is confirmed on the spot; an order API goes here. */
-export async function placeOrder(order: Order, now = new Date()): Promise<PlacedOrder> {
-  await new Promise((r) => setTimeout(r, 500));
-  const ship = shippingById(order.shipping);
-  const subtotal = orderSubtotal(order.lines);
-  const placed: PlacedOrder = {
-    ...order,
-    number: orderNumber(),
-    placedAt: now.toISOString(),
-    subtotal,
-    shippingCost: ship.price,
-    total: subtotal + ship.price,
-    arrives: [addBusinessDays(now, ship.days[0]).toISOString(), addBusinessDays(now, ship.days[1]).toISOString()],
-  };
-  saveOrder(placed);
+/** One key per checkout attempt: a retry of the same attempt can never create a second order. */
+export const newIdempotencyKey = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `k${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+
+/**
+ * Places the order with the API. The server prices it (the totals shown in
+ * the cart are only a preview) and returns the order number and tracking code.
+ * Throws ApiError with a message that is safe to show.
+ */
+export async function placeOrder(order: Order, idempotencyKey: string, honeypot = ""): Promise<PlacedOrder> {
+  const res = await api<PlacedOrderResponse>("/v1/orders", {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: { ...order, ...(honeypot ? { website: honeypot } : {}) },
+    timeoutMs: 20_000,
+  });
+  const placed = fromResponse(res);
+  rememberOrder(placed);
   return placed;
 }
 

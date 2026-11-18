@@ -12,12 +12,14 @@ import Sky from "@/components/Sky";
 import Swap from "@/components/Swap";
 import { TeeDefs } from "@/components/Tee";
 import { Footer, How, Parents, Promo, Reviews } from "@/components/sections";
+import { getCatalog } from "@/lib/catalog.server";
 import { ShopProvider } from "@/store/ShopProvider";
 import "@/styles/playweary.css";
 
-export default function Page() {
+export default async function Page() {
+  const catalog = await getCatalog();
   return (
-    <ShopProvider>
+    <ShopProvider catalog={catalog}>
       <Sky />
       <TeeDefs />
       <a className="skip" href="#main">

@@ -1,7 +1,10 @@
 /**
  * What the shop sells: two kits, one per character. Each kit is the shirt plus
  * all three of that character's sets, so the sets are never sold on their own.
- * Prices live here, and only here.
+ *
+ * Live prices and stock come from the API (see lib/catalog) and are applied
+ * over these in ShopProvider; KIT_PRICE here is only the fallback when the
+ * API is unreachable. The real price is set in the admin portal.
  */
 
 import { type CharacterId, CHARACTERS } from "./characters";
@@ -22,6 +25,11 @@ export type Product = {
   cta?: string;
   /** The character this kit is for. */
   character?: CharacterId;
+  /** Live from the API (lib/catalog): false when the kit is switched off in the admin. */
+  available?: boolean;
+  /** Live from the API: out of stock but still orderable; ships later. */
+  backorder?: boolean;
+  backorderNote?: string | null;
 };
 
 export const CURRENCY = "USD";

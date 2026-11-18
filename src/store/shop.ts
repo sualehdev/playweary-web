@@ -84,8 +84,9 @@ export function shopReducer(state: ShopState, action: ShopAction): ShopState {
 
 export const cartCount = (cart: CartLine[]) => cart.reduce((n, l) => n + l.q, 0);
 
-export const cartTotal = (cart: CartLine[]) =>
-  cart.reduce((sum, l) => sum + (productById(l.id)?.price ?? 0) * l.q, 0);
+/** Pass `useShop().productById` for live prices; defaults to the static catalogue. */
+export const cartTotal = (cart: CartLine[], lookup: (id: string) => { price: number } | undefined = productById) =>
+  cart.reduce((sum, l) => sum + (lookup(l.id)?.price ?? 0) * l.q, 0);
 
 /** Set ids you can dress with: every kit includes all of its sets. */
 export const ownedSets = (): Set<string> => new Set(ALL_SETS.map((s) => s.id));

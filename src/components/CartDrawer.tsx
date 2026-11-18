@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { money, productById } from "@/content/products";
+import { money } from "@/content/products";
 import { cartCount, cartTotal } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 
 export default function CartDrawer() {
-  const { state, closeDrawer, setQty } = useShop();
+  const { state, closeDrawer, setQty, productById } = useShop();
   const { cart, drawerOpen } = state;
   const n = cartCount(cart);
   const panel = useRef<HTMLElement>(null);
@@ -75,6 +75,7 @@ export default function CartDrawer() {
                       <div>
                         <b>{p.name}</b>
                         <div className="cartMeta">Size {l.size} · shirt + all 3 sets</div>
+                        {p.backorder ? <div className="cartMeta backorder">{p.backorderNote || "Backorder: ships a little later"}</div> : null}
                         <div className="qty" role="group" aria-label={`Quantity of ${label}`}>
                           <button type="button" aria-label={`One fewer ${label}`} onClick={() => setQty(l.id, l.size, l.q - 1)}>
                             −
@@ -99,7 +100,7 @@ export default function CartDrawer() {
                 <td>
                   <strong>Subtotal</strong>
                 </td>
-                <td>{money(cartTotal(cart))}</td>
+                <td>{money(cartTotal(cart, productById))}</td>
               </tr>
             ) : null}
           </tbody>
@@ -112,7 +113,7 @@ export default function CartDrawer() {
             Free US shipping on every kit · 30-day returns · OEKO-TEX cotton · sized by height.
           </p>
           <Link className="btn wide" href="/checkout" onClick={closeDrawer}>
-            Checkout · {money(cartTotal(cart))}
+            Checkout · {money(cartTotal(cart, productById))}
           </Link>
           <p style={{ fontSize: ".85rem", textAlign: "center", marginTop: ".6rem" }}>
             <Link href="/track" onClick={closeDrawer}>

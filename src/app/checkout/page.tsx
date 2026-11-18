@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Checkout from "@/components/Checkout";
+import { getCatalog } from "@/lib/catalog.server";
 import { ShopProvider } from "@/store/ShopProvider";
 import "@/styles/playweary.css";
 
@@ -9,9 +10,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const catalog = await getCatalog();
   return (
-    <ShopProvider>
+    <ShopProvider catalog={catalog}>
       <Checkout />
     </ShopProvider>
   );

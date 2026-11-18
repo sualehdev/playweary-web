@@ -3,6 +3,7 @@ import CartDrawer from "@/components/CartDrawer";
 import Header from "@/components/Header";
 import Track from "@/components/Track";
 import { Promo } from "@/components/sections";
+import { getCatalog } from "@/lib/catalog.server";
 import { ShopProvider } from "@/store/ShopProvider";
 import "@/styles/playweary.css";
 
@@ -12,9 +13,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function TrackPage() {
+export default async function TrackPage() {
+  const catalog = await getCatalog();
   return (
-    <ShopProvider>
+    <ShopProvider catalog={catalog}>
       <Promo />
       <Header />
       <CartDrawer />

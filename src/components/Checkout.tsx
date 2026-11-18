@@ -5,29 +5,33 @@
  * The checkout: contact, US shipping address, shipping speed and payment
  * (cash on delivery; PayPal is shown switched off until launch), with the
  * order summary beside it. Placing the order goes through `placeOrder` in
- * lib/checkout, the only place that will talk to a server.
+ * lib/checkout, which sends it to the API; the server's prices and totals are
+ * what the confirmation shows.
  */
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { brandSize, brandSrc } from "@/content/art";
-import { money, productById } from "@/content/products";
+import { money } from "@/content/products";
+import { ApiError } from "@/lib/api";
 import {
   SHIPPING,
   US_STATES,
   orderSubtotal,
+  newIdempotencyKey,
   placeOrder,
   shippingById,
   validate,
   type Errors,
   type Fields,
   type PaymentMethod,
+  type PlacedLine,
   type PlacedOrder,
   type ShippingMethod,
 } from "@/lib/checkout";
 import { confetti } from "@/lib/effects";
 import { isEmail } from "@/lib/newsletter";
-import { cartCount } from "@/store/shop";
+import { cartCount, type CartLine } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 
@@ -88,13 +92,17 @@ function Summary({
   shipping,
   editable,
   lines,
+  totals,
 }: {
   shipping: ShippingMethod;
   editable: boolean;
-  lines: PlacedOrder["lines"];
+  lines: (CartLine | PlacedLine)[];
+  /** The server's totals once the order is placed; otherwise a preview from live prices. */
+  totals?: { subtotal: number; shipping: number; total: number };
 }) {
-  const { setQty } = useShop();
-  const subtotal = orderSubtotal(lines);
+  const { setQty, productById } = useShop();
+  const subtotal = totals?.subtotal ?? orderSubtotal(lines, productById);
+  const shipCost = totals?.shipping ?? shipping.price;
   return (
     <div className="coSummary card">
       <h2 className="coH">Order summary</h2>
@@ -125,7 +133,8 @@ function Summary({
                   <span>Qty {l.q}</span>
                 )}
               </div>
-              <b className="coLinePrice">{money(p.price * l.q)}</b>
+              <b className="coLinePrice">{money("lineTotal" in l ? l.lineTotal : p.price * l.q)}</b>
+              {editable && p.backorder ? <span className="cartMeta backorder">{p.backorderNote || "Backorder: ships a little later"}</span> : null}
             </li>
           );
         })}
@@ -137,11 +146,11 @@ function Summary({
         </div>
         <div>
           <dt>Shipping ({shipping.name})</dt>
-          <dd>{shipping.price ? money(shipping.price) : "Free"}</dd>
+          <dd>{shipCost ? money(shipCost) : "Free"}</dd>
         </div>
         <div className="coGrand">
           <dt>Total</dt>
-          <dd>{money(subtotal + shipping.price)}</dd>
+          <dd>{money(totals?.total ?? subtotal + shipCost)}</dd>
         </div>
       </dl>
       <p className="coSmall">Sales tax, where it applies, is included in the price.</p>
@@ -171,16 +180,21 @@ function Confirmation({ order }: { order: PlacedOrder }) {
         ✓
       </div>
       <h1>Thank you, {a.firstName}!</h1>
-      <p className="coLead">Your order is confirmed. Keep this reference number to follow your kit on its journey.</p>
+      <p className="coLead">
+        We&apos;ve got your order. We&apos;ll confirm it with you shortly, and a receipt is on its way to {order.email}. Keep this
+        number to follow your kit on its journey.
+      </p>
       <div className="coRef">
         <span className="coRefNum">{order.number}</span>
         <button type="button" className="btn ghost sm" onClick={copy}>
           {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      <p className="coSmall">This is a prototype order: no payment was taken and no email is sent.</p>
+      {order.isBackorder ? (
+        <p className="buyNote">Something in your order is on backorder, so it may ship a little later than usual. We&apos;ll email you when it&apos;s on its way.</p>
+      ) : null}
       <div className="coDoneActions">
-        <Link className="btn" href={`/track?ref=${order.number}`}>
+        <Link className="btn" href={`/track?code=${order.trackingCode}`}>
           Track this order
         </Link>
       </div>
@@ -218,7 +232,12 @@ function Confirmation({ order }: { order: PlacedOrder }) {
           </p>
         </div>
       </div>
-      <Summary shipping={shippingById(order.shipping)} editable={false} lines={order.lines} />
+      <Summary
+        shipping={shippingById(order.shipping)}
+        editable={false}
+        lines={order.lines}
+        totals={{ subtotal: order.subtotal, shipping: order.shippingCost, total: order.total }}
+      />
       <Link className="btn ghost" href="/">
         Back to Playweary
       </Link>
@@ -227,17 +246,23 @@ function Confirmation({ order }: { order: PlacedOrder }) {
 }
 
 export default function Checkout() {
-  const { state, clear } = useShop();
+  const { state, clear, productById } = useShop();
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [shipping, setShipping] = useState<ShippingMethod["id"]>("standard");
   const payment: PaymentMethod = "cod";
   const [busy, setBusy] = useState(false);
   const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+  const [serverError, setServerError] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const top = useRef<HTMLDivElement>(null);
+  const alertRef = useRef<HTMLParagraphElement>(null);
+  // One key per attempt: retrying after a network error can't create a second order.
+  const attemptKey = useRef<string | null>(null);
 
   const ship = shippingById(shipping);
-  const total = orderSubtotal(state.cart) + ship.price;
+  const total = orderSubtotal(state.cart, productById) + ship.price;
+  const unavailable = state.cart.filter((l) => productById(l.id)?.available === false);
   const empty = state.hydrated && cartCount(state.cart) === 0;
 
   useEffect(() => {
@@ -259,12 +284,24 @@ export default function Checkout() {
       document.getElementById("co-" + first)?.focus();
       return;
     }
+    if (unavailable.length) {
+      setServerError(`${productById(unavailable[0].id)?.name ?? "A kit"} isn't available right now. Please remove it to continue.`);
+      return;
+    }
     setBusy(true);
+    setServerError("");
+    attemptKey.current ??= newIdempotencyKey();
     try {
       const { email, phone, ...address } = fields;
-      const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart });
+      const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart }, attemptKey.current, honeypot);
+      attemptKey.current = null;
       setPlaced(order);
       clear();
+    } catch (err) {
+      // A rejected order (4xx) was not stored, so the next attempt gets a fresh key.
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) attemptKey.current = null;
+      setServerError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      requestAnimationFrame(() => alertRef.current?.focus());
     } finally {
       setBusy(false);
     }
@@ -276,7 +313,7 @@ export default function Checkout() {
         <Link href="/" aria-label="Playweary home">
           <img src={brandSrc("logo_light", 380)} {...brandSize("logo_light")} alt="Playweary" className="coLogo" />
         </Link>
-        <span className="coSecure">🔒 Demo checkout</span>
+        <span className="coSecure">🔒 Secure checkout</span>
         <Link className="coBack" href="/#bench">
           ← Back to shop
         </Link>
@@ -395,11 +432,20 @@ export default function Checkout() {
                   </div>
                 </fieldset>
 
+                <div className="coHp" aria-hidden="true">
+                  <label htmlFor="co-website">Leave this empty</label>
+                  <input id="co-website" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+                </div>
+                {serverError ? (
+                  <p className="coAlert" role="alert" tabIndex={-1} ref={alertRef}>
+                    {serverError}
+                  </p>
+                ) : null}
                 <button className="btn wide coPlace" type="submit" disabled={busy} aria-busy={busy}>
                   {busy ? "Placing your order…" : `Place order · ${money(total)}`}
                 </button>
                 <p className="coSmall center">
-                  Prototype checkout: no real payment is taken. By placing your order you agree to our{" "}
+                  You pay the courier in cash when your kit arrives. By placing your order you agree to our{" "}
                   <Link href="/#info-delivery">30-day returns policy</Link>. Questions? hello@playweary.com
                 </p>
               </form>
