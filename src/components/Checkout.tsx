@@ -433,8 +433,22 @@ export default function Checkout() {
                 </fieldset>
 
                 <div className="coHp" aria-hidden="true">
-                  <label htmlFor="co-website">Leave this empty</label>
-                  <input id="co-website" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+                  {/* Bot trap. Named so browser autofill and password managers leave it alone
+                      (a field called "website" gets autofilled and blocks real orders). */}
+                  <label htmlFor="co-hp-ref">Leave this empty</label>
+                  <input
+                    id="co-hp-ref"
+                    name="pw_hp_ref"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    data-1p-ignore=""
+                    data-lpignore="true"
+                    data-bwignore=""
+                    data-form-type="other"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
                 </div>
                 {serverError ? (
                   <p className="coAlert" role="alert" tabIndex={-1} ref={alertRef}>
