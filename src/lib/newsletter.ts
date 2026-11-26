@@ -11,6 +11,6 @@ export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()
 
 export async function subscribe(email: string): Promise<SubscribeResult> {
   if (!isEmail(email)) return { ok: false, error: "That does not look like an email address yet." };
-  // TODO(launch): POST to the mailing-list provider here.
+  // Not connected to a mailing-list provider yet: the address is accepted but not stored.
   return { ok: true };
 }

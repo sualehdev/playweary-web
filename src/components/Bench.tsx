@@ -12,6 +12,7 @@
  * a Draggable created once never reads stale state.
  */
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { pieceArt, pieceSize, pieceSrc } from "@/content/art";
 import {
@@ -526,9 +527,9 @@ export default function Bench() {
                     </button>
                   ))}
                 </div>
-                <a className="sizeGuide" href="#info-sizing">
+                <Link className="sizeGuide" href="/products/boy-shirt-kit#sizes">
                   Size guide
-                </a>
+                </Link>
               </div>
               <button className="btn wide" id="addLook" type="button" disabled={!canBuy} onClick={(e) => addKit(e.currentTarget)}>
                 {canBuy ? `Add to cart · ${money(kit.price)}` : "Not available right now"}

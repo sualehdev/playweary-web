@@ -124,7 +124,7 @@ p {
 section {
   position: relative;
   padding: 4.5rem 0;
-  scroll-margin-top: 96px;
+  scroll-margin-top: 130px;
 }
 .eyebrow {
   font-family: var(--display);
@@ -230,43 +230,107 @@ a.btn {
   color: #fff;
   font-family: var(--display);
   font-weight: 700;
-  font-size: 0.82rem;
-  text-align: center;
-  padding: 0.5rem 1rem;
+  font-size: 0.86rem;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  line-height: 1.2;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 61;
 }
-#promo b {
-  color: var(--amber);
+.promoTrack {
+  display: flex;
+  width: max-content;
+  animation: promoScroll var(--promo-dur, 40s) linear infinite;
+  will-change: transform;
+}
+#promo[data-dir="right"] .promoTrack {
+  animation-direction: reverse;
+}
+#promo:hover .promoTrack {
+  animation-play-state: paused;
+}
+.promoSet {
+  display: flex;
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.promoSet li {
+  white-space: nowrap;
+  padding-right: 4rem;
+  position: relative;
+}
+.promoSet li::after {
+  content: "";
+  position: absolute;
+  right: 1.7rem;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  transform: translateY(-50%);
+}
+@keyframes promoScroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promoTrack {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .promoSet[aria-hidden="true"],
+  .promoSet li:not(:first-child) {
+    display: none;
+  }
+  .promoSet li {
+    padding-right: 0;
+  }
+  .promoSet li::after {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  #promo {
+    font-size: 0.78rem;
+  }
 }
 header.bar {
   position: fixed;
-  top: 30px;
+  top: 34px;
   left: 0;
   right: 0;
   z-index: 60;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.6rem;
   justify-content: space-between;
-  padding: 0.45rem clamp(1rem, 4vw, 2rem);
+  padding: 0.9rem clamp(1.25rem, 4.5vw, 3.5rem);
   background: var(--cream);
   color: var(--ink);
   box-shadow: 0 2px 14px rgba(32, 2, 66, 0.09);
 }
 .bar img.mark {
-  height: 30px;
+  flex-shrink: 0;
+  height: 56px;
   width: auto;
   display: block;
 }
 .bar nav {
   display: flex;
-  gap: 1.15rem;
+  gap: clamp(1rem, 1.7vw, 1.9rem);
+  white-space: nowrap;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1rem;
   align-items: center;
   margin-left: auto;
 }
@@ -278,7 +342,19 @@ header.bar {
 .bar nav a:hover {
   opacity: 1;
 }
-@media (max-width: 900px) {
+.bar nav a.navKit {
+  opacity: 1;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 0.38em 1em;
+  transition: background 0.15s, color 0.15s;
+}
+.bar nav a.navKit:hover {
+  background: var(--ink);
+  color: #fff;
+}
+@media (max-width: 1180px) {
   .bar nav a {
     display: none;
   }
@@ -291,7 +367,7 @@ header.bar {
   cursor: pointer;
   background: var(--ink);
   color: #fff;
-  padding: 0.5em 0.95em;
+  padding: 0.6em 1.1em;
   border-radius: 999px;
   display: inline-flex;
   gap: 0.4rem;
@@ -356,7 +432,7 @@ header.bar {
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding-top: 7rem;
+  padding-top: 10rem;
 }
 .herogrid {
   display: grid;
@@ -627,7 +703,8 @@ header.bar {
   left: 50%;
   bottom: 1%;
   transform: translateX(-50%);
-  width: min(1120px, 96vw);
+  /* never taller than the screen (4:3 art), or a wide short window pushes the kids off the bottom */
+  width: min(1120px, 96vw, 112svh);
   aspect-ratio: 1200/900;
   pointer-events: none;
 }
@@ -739,24 +816,29 @@ header.bar {
 .seqCaps {
   position: absolute;
   left: 50%;
-  bottom: 12%;
+  bottom: 15%;
   transform: translateX(-50%);
   width: min(92vw, 720px);
   pointer-events: none;
 }
 .seqCap {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
   bottom: 0;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 100%;
   margin: 0;
+  padding: 0.18em 0.8em 0.26em;
+  border-radius: 999px;
+  background: rgba(255, 247, 239, 0.92);
+  box-shadow: 0 6px 22px rgba(32, 2, 66, 0.12);
   text-align: center;
   font-family: var(--display);
   font-weight: 800;
   font-size: clamp(1.5rem, 5vw, 3rem);
   line-height: 1.05;
   color: var(--ink);
-  text-shadow: 0 2px 0 rgba(255, 247, 239, 0.9), 0 0 24px rgba(255, 247, 239, 0.9);
 }
 /* The captions are decorative duplicates of one sentence; that sentence lives
    here for screen readers and for anyone who never scrolls the section. */
@@ -1699,7 +1781,7 @@ footer.f input {
   position: fixed;
   inset: 0;
   z-index: 1;
-  padding-top: 5.5rem;
+  padding-top: 8.5rem;
   display: grid;
   place-items: center;
   background: var(--cream);
@@ -1731,15 +1813,15 @@ footer.f input {
 #mobileMenu a:nth-child(3n + 1):hover { background: rgba(252, 192, 6, 0.35); }
 #mobileMenu a:nth-child(3n + 2):hover { background: rgba(159, 62, 255, 0.18); }
 #mobileMenu a:nth-child(3n):hover { background: rgba(255, 45, 96, 0.16); }
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .menuBtn { display: grid; }
   .deskNav { display: none; }
   header.bar { justify-content: space-between; }
-  .bar img.mark { height: 28px; }
+  .bar img.mark { height: 44px; }
   .cartWord { display: none; }
   .cartIcon { display: block; }
 }
-@media (min-width: 901px) {
+@media (min-width: 1181px) {
   #mobileMenu { display: none; }
 }
 
@@ -2172,6 +2254,8 @@ footer.f .flinks a {
 .coPage {
   min-height: 100vh;
   background: linear-gradient(175deg, var(--sky-a) 0%, var(--cream) 46%);
+}
+.coPage .coMain {
   padding-bottom: 4rem;
 }
 .coBar {
@@ -2518,73 +2602,8 @@ footer.f .flinks a {
   margin: 0.8rem 0;
 }
 
-/* ---------- track ---------- */
-.trLookup {
-  display: grid;
-  gap: 0.6rem;
-  padding: 1.3rem;
-  margin-bottom: 1.5rem;
-}
-.trLookup label {
-  font-family: var(--display);
-  font-weight: 800;
-}
-.trLookupRow {
-  display: flex;
-  gap: 0.7rem;
-}
-.trLookupRow input {
-  flex: 1;
-  min-width: 0;
-  font: 800 1.4rem var(--display);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.55em 0.8em;
-  border: 3px solid var(--ink);
-  border-radius: 16px;
-  background: #fff;
-}
-.trChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.trChip {
-  font: 700 0.9rem var(--display);
-  padding: 0.35em 0.9em;
-  border-radius: 999px;
-  border: 2px solid var(--violet);
-  background: #fff;
-  color: var(--ink);
-  cursor: pointer;
-  transition: transform 0.15s;
-}
-.trChip:hover {
-  transform: translateY(-2px) rotate(-2deg);
-}
-.trChip.mine {
-  background: var(--lime);
-  border-color: var(--ink);
-}
-.trResult {
-  display: grid;
-  gap: 1.2rem;
-}
-.trHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.trHead h2 {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  outline: none;
-}
-.trNow {
-  font-size: 1.1rem;
-  max-width: 46ch;
-}
+/* ---------- track (the page layout lives in track.css) ---------- */
+
 .trScene {
   position: relative;
   width: 100%;
@@ -2596,24 +2615,28 @@ footer.f .flinks a {
   border: 4px solid var(--ink);
   box-shadow: 0 8px 0 var(--violet);
 }
+
 .trRoad {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
+
 .trRoadEdge {
   fill: none;
   stroke: var(--ink);
   stroke-width: 46;
   stroke-linecap: round;
 }
+
 .trRoadBed {
   fill: none;
   stroke: #ffd48a;
   stroke-width: 36;
   stroke-linecap: round;
 }
+
 .trRoadDash {
   fill: none;
   stroke: #fff;
@@ -2621,6 +2644,7 @@ footer.f .flinks a {
   stroke-dasharray: 2 16;
   stroke-linecap: round;
 }
+
 .trCloud {
   position: absolute;
   width: 90px;
@@ -2630,10 +2654,12 @@ footer.f .flinks a {
   opacity: 0.9;
   animation: trDrift 38s linear infinite;
 }
+
 .trCloud.c1 {
   top: 8%;
   left: -10%;
 }
+
 .trCloud.c2 {
   top: 22%;
   left: -30%;
@@ -2645,6 +2671,7 @@ footer.f .flinks a {
     transform: translateX(1300%);
   }
 }
+
 .trStop {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -2661,18 +2688,22 @@ footer.f .flinks a {
   opacity: 0.75;
   transition: transform 0.2s;
 }
+
 .trStop.done {
   filter: none;
   opacity: 1;
   background: var(--amber);
 }
+
 .trStop.now {
   animation: trPulse 1.4s ease-in-out infinite;
 }
+
 .trStop.picked {
   outline: 4px solid var(--violet);
   outline-offset: 3px;
 }
+
 .trStop:hover {
   transform: translate(-50%, -50%) scale(1.12);
 }
@@ -2681,6 +2712,7 @@ footer.f .flinks a {
     transform: translate(-50%, -50%) scale(1.15);
   }
 }
+
 .trMover {
   position: absolute;
   left: 0;
@@ -2690,9 +2722,11 @@ footer.f .flinks a {
   pointer-events: none;
   z-index: 3;
 }
+
 .trMover.walking .figure {
   animation: trBob 0.4s ease-in-out infinite;
 }
+
 .trParcel {
   position: absolute;
   right: -10%;
@@ -2705,107 +2739,9 @@ footer.f .flinks a {
     transform: translateY(-5px) rotate(2deg);
   }
 }
-.trCols {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 1.2rem;
-  align-items: start;
-}
-.trSteps {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1rem;
-  display: grid;
-  gap: 0.4rem;
-}
-.trSteps button {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  width: 100%;
-  text-align: left;
-  padding: 0.6rem 0.8rem;
-  border-radius: 16px;
-  border: 2px solid transparent;
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--ink);
-  font: inherit;
-  cursor: pointer;
-}
-.trSteps li.picked button {
-  border-color: var(--violet);
-  background: #fff;
-}
-.trSteps li:not(.done) button {
-  opacity: 0.6;
-}
-.trDot {
-  width: 2rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font: 800 0.95rem var(--display);
-  border: 2px solid var(--ink);
-  background: #fff;
-  flex: none;
-}
-.trSteps li.done .trDot {
-  background: var(--lime);
-}
-.trSteps li.now .trDot {
-  background: var(--amber);
-}
-.trStepText {
-  display: grid;
-}
-.trStepText span {
-  font-size: 0.88rem;
-  opacity: 0.7;
-}
-.trDetail,
-.trOrder,
-.trDemo {
-  padding: 1.1rem;
-}
-.trDetail h3 {
-  font-size: 1.4rem;
-  margin-bottom: 0.3rem;
-}
-.trFacts {
-  display: grid;
-  gap: 0.6rem;
-  margin: 0.8rem 0 0;
-}
-.trFacts dt {
-  font: 800 0.8rem var(--display);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.65;
-}
-.trFacts dd {
-  margin: 0;
-}
-.trDemo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  border: 2px dashed var(--violet);
-}
-.trDemoBtns {
-  display: flex;
-  gap: 0.6rem;
-}
-@media (max-width: 820px) {
-  .trCols {
-    grid-template-columns: 1fr;
-  }
-  .trLookupRow {
-    flex-direction: column;
-  }
-}
+
+
+
 @media (prefers-reduced-motion: reduce) {
   .trCloud,
   .trStop.now,
@@ -2813,6 +2749,84 @@ footer.f .flinks a {
     animation: none;
   }
 }
-.trPage .coMain {
-  padding-top: 8.5rem;
+.coHint {
+  margin: -0.3rem 0 0;
+  font-size: 0.85rem;
+  color: #14804a;
+}
+
+/* order value + item ids on the thank-you page (read by the team's tracking) */
+.coTrack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin: 1.2rem 0;
+  padding: 0.9rem 1.2rem;
+  border-radius: 16px;
+  background: rgba(159, 62, 255, 0.08);
+  border: 1px dashed var(--violet);
+}
+.coTrack div {
+  display: grid;
+}
+.coTrack span {
+  font: 800 0.75rem var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.65;
+}
+.coTrack b {
+  font: 800 1.1rem var(--display);
+}
+
+/* order placed / receipt loading: a calm card, then the receipt fades in */
+.coWait {
+  max-width: 760px;
+  min-height: 320px;
+  margin: 1rem auto;
+  display: grid;
+  gap: 0.8rem;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  animation: coFade 0.25s ease-out both;
+}
+.coWait h1 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin: 0;
+}
+.coWait p {
+  margin: 0;
+  opacity: 0.75;
+}
+.coSpinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 5px solid rgba(159, 62, 255, 0.2);
+  border-top-color: var(--violet);
+  animation: coSpin 0.8s linear infinite;
+}
+.coDone {
+  animation: coFade 0.45s ease-out both;
+}
+@keyframes coSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes coFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coSpinner {
+    animation-duration: 2.4s;
+  }
+  .coWait,
+  .coDone {
+    animation: none;
+  }
 }

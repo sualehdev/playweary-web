@@ -110,7 +110,7 @@ export default function CartDrawer() {
         </p>
         <div id="cartFoot" hidden={n === 0}>
           <p style={{ fontSize: ".85rem", opacity: 0.8 }}>
-            Free US shipping on every kit · 30-day returns · OEKO-TEX cotton · sized by height.
+            30-day returns on unworn items · sized by height.
           </p>
           <Link className="btn wide" href="/checkout" onClick={closeDrawer}>
             Checkout · {money(cartTotal(cart, productById))}

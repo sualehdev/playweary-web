@@ -2,25 +2,37 @@
 /* The sections that are only words: server-rendered, no JavaScript. */
 
 import { brandSize, brandSrc, decorSrc } from "@/content/art";
-import { INFO } from "@/content/info";
-import Newsletter from "./Newsletter";
+import Link from "next/link";
+import { BUSINESS } from "@/content/business";
+import { POLICY_BY_SLUG } from "@/content/policies";
+import { getPromo } from "@/lib/settings.server";
+import { promoLoop } from "@/lib/settings";
 
 /** Decoration from the layout PDF. Always hidden from assistive tech. */
 export function Decor({ name, className }: { name: Parameters<typeof decorSrc>[0]; className: string }) {
   return <img className={"decor " + className} src={decorSrc(name)} alt="" aria-hidden="true" />;
 }
 
-const Quote = ({ colour }: { colour: string }) => (
-  <svg className="quote" viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M32 6C17 6 6 17 6 32v22a4 4 0 0 0 4 4h22c15 0 26-11 26-26S47 6 32 6Z" fill={colour} />
-    <path d="M24 24c-4 2-7 6-7 11 0 4 3 7 6 7s6-3 6-6-2-5-5-5c0-3 2-5 4-6Zm18 0c-4 2-7 6-7 11 0 4 3 7 6 7s6-3 6-6-2-5-5-5c0-3 2-5 4-6Z" fill="#fff" />
-  </svg>
-);
-
-export function Promo() {
+/** The top bar: messages that scroll in a loop. Text, speed and direction come from the admin dashboard. */
+export async function Promo() {
+  const promo = await getPromo();
+  if (!promo.enabled) return <style>{"header.bar{top:0!important}"}</style>;
+  const { reps, seconds } = promoLoop(promo);
+  const set = Array.from({ length: reps }, () => promo.messages).flat();
   return (
-    <div id="promo">
-      <b>Free US shipping</b> on every kit · 30-day returns
+    <div id="promo" role="region" aria-label="Announcements" data-dir={promo.direction}>
+      <div className="promoTrack" style={{ ["--promo-dur" as string]: `${seconds}s` }}>
+        <ul className="promoSet">
+          {set.map((m, i) => (
+            <li key={i}>{m}</li>
+          ))}
+        </ul>
+        <ul className="promoSet" aria-hidden="true">
+          {set.map((m, i) => (
+            <li key={i}>{m}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -63,47 +75,6 @@ export function How() {
   );
 }
 
-export function Reviews() {
-  return (
-    <section id="reviews">
-      <div className="wrap">
-        <div className="eyebrow">what parents say</div>
-        <h2>Bought once. Worn everywhere.</h2>
-        <Decor name="confetti" className="dConfetti" />
-        <div className="revs">
-          <div className="card rev">
-            <Quote colour="#9F3EFF" />
-            <div className="stars">★★★★★</div>
-            <p>
-              &quot;He changes it three times before school. One shirt, so I&apos;m still doing one
-              wash.&quot;
-            </p>
-            <cite>Jessica M., mom of two · Austin, TX</cite>
-          </div>
-          <div className="card rev">
-            <Quote colour="#81DF40" />
-            <div className="stars">★★★★★</div>
-            <p>
-              &quot;The pieces have survived a term and a half. I expected them in the bin by
-              October.&quot;
-            </p>
-            <cite>Daniel R., dad of a 5-year-old · Columbus, OH</cite>
-          </div>
-          <div className="card rev">
-            <Quote colour="#FF2D60" />
-            <div className="stars">★★★★☆</div>
-            <p>
-              &quot;Sizing chart is by height, which is the first time that&apos;s been
-              useful.&quot;
-            </p>
-            <cite>Priya S., mom of twins · San Jose, CA</cite>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function Parents() {
   return (
     <section id="parents">
@@ -129,11 +100,11 @@ export function Parents() {
             </p>
           </div>
           <div className="card">
-            <div className="spec">3 Qs</div>
-            <h3>The velcro answers</h3>
+            <div className="spec">3+</div>
+            <h3>Made for ages 3 and up</h3>
             <p style={{ fontSize: ".93rem", margin: 0 }}>
-              Does it scratch? Catch hair? Is a loose piece a choke risk for a baby sibling? Answered
-              in writing, unprompted. <a href="#info-safety">Read the Safety page.</a>
+              The pieces are small, so keep loose ones away from babies and younger siblings. The
+              choking-hazard warning is on every product page.
             </p>
           </div>
           <div className="card">
@@ -149,24 +120,52 @@ export function Parents() {
   );
 }
 
+const FOOTER_GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
+  {
+    title: "Shop",
+    links: [
+      { href: "/products/boy-shirt-kit", label: "Boys Shirt Kit" },
+      { href: "/products/girl-shirt-kit", label: "Girls Shirt Kit" },
+      { href: "/track", label: "Track your order" },
+    ],
+  },
+  {
+    title: "Help",
+    links: ["shipping-policy", "returns-refunds", "payment-policy", "faq", "contact"].map((slug) => ({ href: "/" + slug, label: POLICY_BY_SLUG[slug].link })),
+  },
+  {
+    title: "Company",
+    links: ["about", "privacy-policy", "terms-of-service", "cookie-policy"].map((slug) => ({
+      href: "/" + slug,
+      label: POLICY_BY_SLUG[slug].link,
+    })),
+  },
+];
+
 export function Footer() {
   return (
     <footer className="f">
       <div className="wrap">
-        <img src={brandSrc("logo_dark", 380)} {...brandSize("logo_dark")} alt="Playweary" />
-        <h2>Played till weary.</h2>
-        <p style={{ opacity: 0.82, marginTop: ".6rem" }}>
-          We&apos;ll write when a new set lands. About once a month, never more.
-        </p>
-        <Newsletter />
-        <nav className="flinks" aria-label="Information">
-          {INFO.map((e) => (
-            <a key={e.id} href={"#info-" + e.id}>
-              {e.title}
-            </a>
+        <div className="fCols">
+          <div className="fBrand">
+            <img src={brandSrc("logo_dark", 380)} {...brandSize("logo_dark")} alt="Playweary" />
+            <p>Kids&apos; shirts with velcro hair, outfits and shoes that rip off and stick back on.</p>
+            <address>
+              <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+            </address>
+          </div>
+          {FOOTER_GROUPS.map((g) => (
+            <nav key={g.title} aria-label={g.title} className="fGroup">
+              <h3>{g.title}</h3>
+              {g.links.map((l) => (
+                <Link key={l.href} href={l.href}>
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
           ))}
-        </nav>
-        <p className="fine">© 2026 Playweary · hello@playweary.com · emails are for grown-ups only</p>
+        </div>
+        <p className="fine">© 2026 {BUSINESS.brand} · Emails are for grown-ups only</p>
       </div>
     </footer>
   );

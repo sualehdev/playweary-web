@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Checkout from "@/components/Checkout";
 import { getCatalog } from "@/lib/catalog.server";
+import { getShipping } from "@/lib/settings.server";
 import { ShopProvider } from "@/store/ShopProvider";
 import "@/styles/playweary.css";
 
@@ -11,10 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const catalog = await getCatalog();
+  const [catalog, shipping] = await Promise.all([getCatalog(), getShipping()]);
   return (
     <ShopProvider catalog={catalog}>
-      <Checkout />
+      <Checkout shippingCents={shipping.standardCents} />
     </ShopProvider>
   );
 }

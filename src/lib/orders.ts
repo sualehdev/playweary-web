@@ -2,8 +2,8 @@
  * Order tracking against the Playweary API.
  *
  * Two ways in: the private tracking code from the confirmation screen and
- * emails (/track?code=PWT-…), or the order number plus the email used at
- * checkout. The stage comes from the order's real status, set by the store
+ * emails (/track?code=PWT-…) for the full view, or just the order number for
+ * a progress-only view (order numbers are guessable, so no personal details). The stage comes from the order's real status, set by the store
  * team in the admin portal; `timeline` lays the server's events over the
  * five storybook stages the page draws.
  */
@@ -37,6 +37,11 @@ export type TrackedLine = { id: string; name: string; size: string; q: number; u
 
 /** GET /v1/track/:code (money converted to dollars). */
 export type TrackedOrder = {
+  /**
+   * True when only the order number was given: progress only. `lines`, totals, `shipTo` and
+   * `email` are empty and `trackingCode` is "" (the API withholds them), so the UI must not show them.
+   */
+  limited?: boolean;
   number: string;
   trackingCode: string;
   status: OrderStatus;
@@ -58,6 +63,12 @@ export type TrackedOrder = {
   carrierTrackingNumber: string | null;
   timeline: { status: OrderStatus; stage: StageId | "cancelled"; message: string | null; at: string }[];
 };
+
+/** GET /v1/track/by-number/:number */
+type LimitedResponse = Pick<
+  TrackedOrder,
+  "number" | "status" | "stage" | "placedAt" | "arrives" | "isBackorder" | "carrier" | "carrierTrackingNumber" | "timeline"
+> & { limited: true };
 
 type TrackResponse = Omit<TrackedOrder, "lines" | "subtotal" | "shippingCost" | "total"> & {
   lines: (Omit<TrackedLine, "unitPrice" | "lineTotal"> & { unitPriceCents: number; lineTotalCents: number })[];
@@ -98,8 +109,21 @@ export async function trackByCode(code: string): Promise<TrackedOrder> {
   return fromResponse(await api<TrackResponse>(`/v1/track/${encodeURIComponent(code)}`));
 }
 
-export async function trackByNumber(number: string, email: string): Promise<TrackedOrder> {
-  return fromResponse(await api<TrackResponse>("/v1/track/lookup", { method: "POST", body: { number, email } }));
+export async function trackByNumber(number: string): Promise<TrackedOrder> {
+  const r = await api<LimitedResponse>(`/v1/track/by-number/${encodeURIComponent(number)}`);
+  return {
+    ...r,
+    trackingCode: "",
+    email: "",
+    shipTo: { firstName: "", city: "", state: "" },
+    shipping: "standard",
+    payment: "cod",
+    paymentStatus: "UNPAID",
+    lines: [],
+    subtotal: 0,
+    shippingCost: 0,
+    total: 0,
+  };
 }
 
 /* ------------------------------------------- orders placed in this browser -- */

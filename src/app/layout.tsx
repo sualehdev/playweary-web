@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito_Sans } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/content/site";
+import { GtmHead, GtmNoscript } from "@/components/Gtm";
 import "./globals.css";
+import "@/styles/policy.css";
 
 const display = Baloo_2({
   variable: "--font-display",
@@ -26,6 +28,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   applicationName: SITE_NAME,
   alternates: { canonical: "/" },
+  verification: { google: "8svPnRu1xO0nAOj_p-2GdQWWyiRi_4HmGJcXTl4dyao" },
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
@@ -55,6 +58,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        <GtmNoscript />
+        <GtmHead />
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </body>

@@ -11,12 +11,10 @@ import type { CartLine } from "@/store/shop";
 import { api, cents } from "./api";
 import { rememberOrder } from "./orders";
 
-export type ShippingMethod = { id: "standard" | "express"; name: string; days: [number, number]; price: number };
+export type ShippingMethod = { id: "standard"; name: string; days: [number, number]; price: number };
 
-export const SHIPPING: ShippingMethod[] = [
-  { id: "standard", name: "Standard", days: [5, 7], price: 0 },
-  { id: "express", name: "Express", days: [2, 3], price: 12 },
-];
+/** Standard is the only method. `price` is the default: the live rate is an admin setting (see lib/settings). */
+export const SHIPPING: ShippingMethod[] = [{ id: "standard", name: "Standard", days: [5, 7], price: 12 }];
 
 export type PaymentMethod = "cod" | "paypal";
 
@@ -63,7 +61,8 @@ export const orderSubtotal = (
   lookup: (id: string) => { price: number } | undefined = productById
 ) => lines.reduce((sum, l) => sum + (l.unitPrice ?? lookup(l.id)?.price ?? 0) * l.q, 0);
 
-export const shippingById = (id: ShippingMethod["id"]) => SHIPPING.find((s) => s.id === id) ?? SHIPPING[0];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const shippingById = (_id?: string) => SHIPPING[0];
 
 /** Add business days (Mon to Fri) to a date. */
 export function addBusinessDays(from: Date, days: number) {
@@ -121,6 +120,21 @@ export async function placeOrder(order: Order, idempotencyKey: string, honeypot 
   const placed = fromResponse(res);
   rememberOrder(placed);
   return placed;
+}
+
+/** City and state for a US ZIP code (public ZIP database). Returns null on any failure: the shopper just types them. */
+export async function lookupZip(zip: string): Promise<{ city: string; state: string } | null> {
+  try {
+    const res = await fetch(`https://api.zippopotam.us/us/${zip}`, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { places?: { "place name"?: string; "state abbreviation"?: string }[] };
+    const p = body.places?.[0];
+    const city = p?.["place name"];
+    const state = p?.["state abbreviation"];
+    return city && state && US_STATES.some(([c]) => c === state) ? { city, state } : null;
+  } catch {
+    return null;
+  }
 }
 
 /* -------------------------------------------------------------- validation -- */

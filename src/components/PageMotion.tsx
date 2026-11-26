@@ -54,12 +54,10 @@ export default function PageMotion() {
       reveal("#how", () => gsap.from(".step", { y: 34, opacity: 0, stagger: 0.09, duration: 0.5 }));
       reveal("#bench", () => {
         gsap.from(".stagebox", { y: 44, opacity: 0, duration: 0.6 });
-        gsap.from("#bench .tray", { y: 34, opacity: 0, stagger: 0.09, duration: 0.5 });
       });
       reveal("#shop", () => gsap.from(".prod", { y: 36, opacity: 0, stagger: 0.07, duration: 0.5 }));
       reveal("#collect", () => gsap.from(".set", { y: 30, opacity: 0, stagger: 0.09, duration: 0.5 }));
-      reveal("#reviews", () => gsap.from(".rev", { y: 26, opacity: 0, stagger: 0.08, duration: 0.45 }));
-      reveal("#parents", () => gsap.from("#parents .card", { y: 26, opacity: 0, stagger: 0.07, duration: 0.45 }));
+      reveal("#parents", () => gsap.from("#parents .card", { y: 26, opacity: 0, stagger: 0.07, duration: 0.45, clearProps: "transform,opacity" }));
     }
 
     return () => {

@@ -21,8 +21,8 @@ export const INFO: InfoEntry[] = [
     id: "delivery",
     title: "Shipping & returns",
     body: [
-      "We ship to all 50 states and DC. Standard shipping is free on every kit and arrives in 5 to 7 business days. Express is $12 and arrives in 2 to 3 business days. Orders placed before 2 pm ET on a weekday leave the same day.",
-      "Returns are free for 30 days. Send back an unworn shirt or an unopened set for a full refund, or swap a size at no cost. Start a return from your order email, or write to hello@playweary.com with your order number.",
+      "We ship to all 50 states and DC. Standard US shipping arrives in 5 to 7 business days, and the rate is shown at checkout. Orders placed before 2 pm ET on a weekday leave the same day.",
+      "Returns are free for 30 days from delivery on unworn shirts and unopened sets: send them back for a full refund, or swap a size at no cost. Write to hello@playweary.com with your order number to start a return. Full details are on our Shipping Policy and Returns & Refunds pages.",
     ],
   },
   {
@@ -46,8 +46,7 @@ export const INFO: InfoEntry[] = [
     id: "contact",
     title: "Contact",
     body: [
-      "Email hello@playweary.com or call (555) 014-2219, Monday to Friday, 9 am to 5 pm ET. We reply within one business day.",
-      "Playweary, 418 Hudson Street, Suite 3, New York, NY 10014.",
+      "Email hello@playweary.com, Monday to Friday, 9 am to 5 pm ET. We reply within one business day. Full details are on our Contact page.",
     ],
   },
 ];

@@ -86,7 +86,7 @@ describe("placed order from the API", () => {
       email: "a@example.com",
       phone: "+15551234567",
       address: { firstName: "Ada", lastName: "L", line1: "1 Main", line2: "", city: "Austin", state: "TX", zip: "73301" },
-      shipping: "express",
+      shipping: "standard",
       payment: "cod",
       lines: [{ id: "kit-boy", size: "5", q: 2, name: "Boy Shirt Kit", unitPriceCents: 4000, lineTotalCents: 8000 }],
       subtotalCents: 8000,

@@ -10,13 +10,14 @@
  */
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { brandSize, brandSrc } from "@/content/art";
 import { money } from "@/content/products";
 import { ApiError } from "@/lib/api";
 import {
-  SHIPPING,
   US_STATES,
+  lookupZip,
   orderSubtotal,
   newIdempotencyKey,
   placeOrder,
@@ -25,20 +26,17 @@ import {
   type Errors,
   type Fields,
   type PaymentMethod,
-  type PlacedLine,
-  type PlacedOrder,
   type ShippingMethod,
 } from "@/lib/checkout";
-import { confetti } from "@/lib/effects";
 import { isEmail } from "@/lib/newsletter";
 import { cartCount, type CartLine } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
+import OrderLoader from "./OrderLoader";
+import { Footer } from "./sections";
 
 const EMPTY: Fields = { email: "", phone: "", firstName: "", lastName: "", line1: "", line2: "", city: "", state: "", zip: "" };
 const ORDER: (keyof Fields)[] = ["email", "phone", "firstName", "lastName", "line1", "city", "state", "zip"];
-
-const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 
 function Field({
   name,
@@ -92,17 +90,14 @@ function Summary({
   shipping,
   editable,
   lines,
-  totals,
 }: {
   shipping: ShippingMethod;
   editable: boolean;
-  lines: (CartLine | PlacedLine)[];
-  /** The server's totals once the order is placed; otherwise a preview from live prices. */
-  totals?: { subtotal: number; shipping: number; total: number };
+  lines: CartLine[];
 }) {
   const { setQty, productById } = useShop();
-  const subtotal = totals?.subtotal ?? orderSubtotal(lines, productById);
-  const shipCost = totals?.shipping ?? shipping.price;
+  const subtotal = orderSubtotal(lines, productById);
+  const shipCost = shipping.price;
   return (
     <div className="coSummary card">
       <h2 className="coH">Order summary</h2>
@@ -133,7 +128,7 @@ function Summary({
                   <span>Qty {l.q}</span>
                 )}
               </div>
-              <b className="coLinePrice">{money("lineTotal" in l ? l.lineTotal : p.price * l.q)}</b>
+              <b className="coLinePrice">{money(p.price * l.q)}</b>
               {editable && p.backorder ? <span className="cartMeta backorder">{p.backorderNote || "Backorder: ships a little later"}</span> : null}
             </li>
           );
@@ -150,7 +145,7 @@ function Summary({
         </div>
         <div className="coGrand">
           <dt>Total</dt>
-          <dd>{money(totals?.total ?? subtotal + shipCost)}</dd>
+          <dd>{money(subtotal + shipCost)}</dd>
         </div>
       </dl>
       <p className="coSmall">Sales tax, where it applies, is included in the price.</p>
@@ -158,101 +153,15 @@ function Summary({
   );
 }
 
-function Confirmation({ order }: { order: PlacedOrder }) {
-  const a = order.address;
-  const tick = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (tick.current) confetti(tick.current, 36);
-  }, []);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(order.number);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* clipboard blocked: the number is on screen */
-    }
-  };
-  return (
-    <div className="coDone card" role="status">
-      <div className="coTick" aria-hidden="true" ref={tick}>
-        ✓
-      </div>
-      <h1>Thank you, {a.firstName}!</h1>
-      <p className="coLead">
-        We&apos;ve got your order. We&apos;ll confirm it with you shortly, and a receipt is on its way to {order.email}. Keep this
-        number to follow your kit on its journey.
-      </p>
-      <div className="coRef">
-        <span className="coRefNum">{order.number}</span>
-        <button type="button" className="btn ghost sm" onClick={copy}>
-          {copied ? "Copied!" : "Copy"}
-        </button>
-      </div>
-      {order.isBackorder ? (
-        <p className="buyNote">Something in your order is on backorder, so it may ship a little later than usual. We&apos;ll email you when it&apos;s on its way.</p>
-      ) : null}
-      <div className="coDoneActions">
-        <Link className="btn" href={`/track?code=${order.trackingCode}`}>
-          Track this order
-        </Link>
-      </div>
-      <div className="coDoneGrid">
-        <div>
-          <h3>Arriving</h3>
-          <p>
-            {day(order.arrives[0])} to {day(order.arrives[1])}
-            <br />
-            {shippingById(order.shipping).name} shipping
-          </p>
-        </div>
-        <div>
-          <h3>Ship to</h3>
-          <p>
-            {a.firstName} {a.lastName}
-            <br />
-            {a.line1}
-            {a.line2 ? (
-              <>
-                <br />
-                {a.line2}
-              </>
-            ) : null}
-            <br />
-            {a.city}, {a.state} {a.zip}
-          </p>
-        </div>
-        <div>
-          <h3>Payment</h3>
-          <p>
-            {order.payment === "cod"
-              ? `Cash on delivery: please have ${money(order.total)} ready for the courier.`
-              : `Paid with PayPal, ${money(order.total)}.`}
-          </p>
-        </div>
-      </div>
-      <Summary
-        shipping={shippingById(order.shipping)}
-        editable={false}
-        lines={order.lines}
-        totals={{ subtotal: order.subtotal, shipping: order.shippingCost, total: order.total }}
-      />
-      <Link className="btn ghost" href="/">
-        Back to Playweary
-      </Link>
-    </div>
-  );
-}
-
-export default function Checkout() {
+export default function Checkout({ shippingCents }: { shippingCents: number }) {
   const { state, clear, productById } = useShop();
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
-  const [shipping, setShipping] = useState<ShippingMethod["id"]>("standard");
+  const shipping: ShippingMethod["id"] = "standard";
   const payment: PaymentMethod = "cod";
   const [busy, setBusy] = useState(false);
-  const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+  const router = useRouter();
+  const [placed, setPlaced] = useState(false);
   const [serverError, setServerError] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const top = useRef<HTMLDivElement>(null);
@@ -260,7 +169,8 @@ export default function Checkout() {
   // One key per attempt: retrying after a network error can't create a second order.
   const attemptKey = useRef<string | null>(null);
 
-  const ship = shippingById(shipping);
+  // Standard is the only method; its price is an admin setting passed in from the page.
+  const ship: ShippingMethod = { ...shippingById(shipping), price: shippingCents / 100 };
   const total = orderSubtotal(state.cart, productById) + ship.price;
   const unavailable = state.cart.filter((l) => productById(l.id)?.available === false);
   const empty = state.hydrated && cartCount(state.cart) === 0;
@@ -269,7 +179,42 @@ export default function Checkout() {
     if (placed) top.current?.scrollIntoView({ block: "start" });
   }, [placed]);
 
+  // The state box is a type-to-search field; `fields.state` holds the two-letter code once it matches.
+  const [stateText, setStateText] = useState("");
+  const [zipNote, setZipNote] = useState("");
+  const autofilled = useRef(false);
+  const stateName = (code: string) => US_STATES.find(([c]) => c === code)?.[1] ?? "";
+
+  const changeState = (text: string) => {
+    setStateText(text);
+    const t = text.trim().toLowerCase();
+    const hit = US_STATES.find(([code, name]) => name.toLowerCase() === t || code.toLowerCase() === t);
+    setFields((f) => ({ ...f, state: hit ? hit[0] : "" }));
+    if (errors.state) setErrors((e) => ({ ...e, state: undefined }));
+  };
+
+  /** A full ZIP fills in the city and state (only if the shopper has not typed them). */
+  const changeZip = (name: keyof Fields, v: string) => {
+    change(name, v);
+    const zip = v.trim().slice(0, 5);
+    if (!/^\d{5}$/.test(zip) || v.trim().length > 5) return;
+    void lookupZip(zip).then((hit) => {
+      if (!hit) return;
+      setFields((f) => {
+        const blankCity = !f.city.trim() || autofilled.current;
+        const blankState = !f.state || autofilled.current;
+        return { ...f, city: blankCity ? hit.city : f.city, state: blankState ? hit.state : f.state };
+      });
+      setStateText((t) => (autofilled.current || !t.trim() ? stateName(hit.state) : t));
+      autofilled.current = true;
+      setZipNote(`${hit.city}, ${hit.state}: filled in from your ZIP code. Change it if it is wrong.`);
+      setErrors((e) => ({ ...e, city: undefined, state: undefined }));
+    });
+  };
+
   const change = (name: keyof Fields, v: string) => {
+    if (name === "city") autofilled.current = false;
+    if (name === "city") setZipNote("");
     setFields((f) => ({ ...f, [name]: v }));
     if (errors[name]) setErrors((e) => ({ ...e, [name]: undefined }));
   };
@@ -295,8 +240,11 @@ export default function Checkout() {
       const { email, phone, ...address } = fields;
       const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart }, attemptKey.current, honeypot);
       attemptKey.current = null;
-      setPlaced(order);
-      clear();
+      setPlaced(true);
+      clear(); // safe: the "order placed" loader shows while we navigate, not the empty-cart message
+      // Value and item ids ride along in the URL too, for tag rules that match on the address.
+      const ids = [...new Set(order.lines.map((l) => l.id))].join(",");
+      router.push(`/thank-you?code=${encodeURIComponent(order.trackingCode)}&value=${order.total.toFixed(2)}&items=${encodeURIComponent(ids)}`);
     } catch (err) {
       // A rejected order (4xx) was not stored, so the next attempt gets a fresh key.
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) attemptKey.current = null;
@@ -321,7 +269,7 @@ export default function Checkout() {
 
       <main className="wrap coMain" id="main">
         {placed ? (
-          <Confirmation order={placed} />
+          <OrderLoader title="Order placed!" note="Taking you to your receipt…" />
         ) : !state.hydrated ? null : empty ? (
           <div className="coEmpty card">
             <h1>Your cart is empty</h1>
@@ -346,6 +294,10 @@ export default function Checkout() {
 
                 <fieldset className="card">
                   <legend className="coH">Shipping address</legend>
+                  <div className="coField">
+                    <label htmlFor="co-country">Country</label>
+                    <input id="co-country" value="United States" readOnly />
+                  </div>
                   <div className="coRow">
                     <Field name="firstName" label="First name" autoComplete="given-name" value={fields.firstName} error={errors.firstName} onChange={change} />
                     <Field name="lastName" label="Last name" autoComplete="family-name" value={fields.lastName} error={errors.lastName} onChange={change} />
@@ -353,54 +305,48 @@ export default function Checkout() {
                   <Field name="line1" label="Street address" autoComplete="address-line1" value={fields.line1} error={errors.line1} onChange={change} />
                   <Field name="line2" label="Apartment, suite, unit" autoComplete="address-line2" optional value={fields.line2} onChange={change} />
                   <div className="coRow three">
+                    <Field name="zip" label="ZIP code" autoComplete="postal-code" inputMode="numeric" value={fields.zip} error={errors.zip} onChange={changeZip} />
                     <Field name="city" label="City" autoComplete="address-level2" value={fields.city} error={errors.city} onChange={change} />
                     <div className={"coField" + (errors.state ? " bad" : "")}>
                       <label htmlFor="co-state">State</label>
-                      <select
+                      <input
                         id="co-state"
                         name="state"
+                        list="co-state-list"
                         autoComplete="address-level1"
-                        value={fields.state}
+                        placeholder="Type to search"
+                        value={stateText}
                         aria-invalid={errors.state ? true : undefined}
                         aria-describedby={errors.state ? "co-state-err" : undefined}
-                        onChange={(e) => change("state", e.target.value)}
-                      >
-                        <option value="">Choose…</option>
+                        onChange={(e) => changeState(e.target.value)}
+                      />
+                      <datalist id="co-state-list">
                         {US_STATES.map(([code, name]) => (
-                          <option key={code} value={code}>
-                            {name}
-                          </option>
+                          <option key={code} value={name} label={code} />
                         ))}
-                      </select>
+                      </datalist>
                       {errors.state ? (
                         <p className="coErr" id="co-state-err">
                           {errors.state}
                         </p>
                       ) : null}
                     </div>
-                    <Field name="zip" label="ZIP code" autoComplete="postal-code" inputMode="numeric" value={fields.zip} error={errors.zip} onChange={change} />
                   </div>
-                  <div className="coField">
-                    <label htmlFor="co-country">Country</label>
-                    <input id="co-country" value="United States" readOnly />
-                  </div>
+                  {zipNote ? <p className="coHint">{zipNote}</p> : null}
                 </fieldset>
 
                 <fieldset className="card">
                   <legend className="coH">Shipping method</legend>
                   <div className="coChoices">
-                    {SHIPPING.map((s) => (
-                      <label key={s.id} className={"coChoice" + (shipping === s.id ? " on" : "")}>
-                        <input type="radio" name="shipping" value={s.id} checked={shipping === s.id} onChange={() => setShipping(s.id)} />
-                        <span className="coChoiceText">
-                          <b>{s.name}</b>
-                          <span>
-                            {s.days[0]} to {s.days[1]} business days
-                          </span>
+                    <div className="coChoice on">
+                      <span className="coChoiceText">
+                        <b>{ship.name}</b>
+                        <span>
+                          {ship.days[0]} to {ship.days[1]} business days
                         </span>
-                        <b>{s.price ? money(s.price) : "Free"}</b>
-                      </label>
-                    ))}
+                      </span>
+                      <b>{ship.price ? money(ship.price) : "Free"}</b>
+                    </div>
                   </div>
                 </fieldset>
 
@@ -415,18 +361,6 @@ export default function Checkout() {
                       </span>
                       <span className="coPayIcon" aria-hidden="true">
                         💵
-                      </span>
-                    </label>
-                    <label className="coChoice off" aria-disabled="true">
-                      <input type="radio" name="payment" value="paypal" checked={false} disabled readOnly />
-                      <span className="coChoiceText">
-                        <b>
-                          PayPal <em className="coSoon">Live at launch</em>
-                        </b>
-                        <span>Online payments switch on when the store opens.</span>
-                      </span>
-                      <span className="coPayPal" aria-hidden="true">
-                        <i>Pay</i>Pal
                       </span>
                     </label>
                   </div>
@@ -460,7 +394,7 @@ export default function Checkout() {
                 </button>
                 <p className="coSmall center">
                   You pay the courier in cash when your kit arrives. By placing your order you agree to our{" "}
-                  <Link href="/#info-delivery">30-day returns policy</Link>. Questions? hello@playweary.com
+                  <Link href="/returns-refunds">Returns &amp; Refunds Policy</Link>, <Link href="/terms-of-service">Terms of Service</Link> and <Link href="/privacy-policy">Privacy Policy</Link>. Questions? hello@playweary.com
                 </p>
               </form>
 
@@ -471,6 +405,7 @@ export default function Checkout() {
           </>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

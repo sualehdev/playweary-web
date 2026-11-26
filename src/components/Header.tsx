@@ -8,25 +8,28 @@ import { cartCount } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import { gsap, reducedMotion, useGSAP } from "@/lib/motion";
 
+/** [href, label, kind]: "kit" links are the product pages, "page" links are home-page anchors. */
 const LINKS = [
-  // ["#shop", "Shop"], // the shop section is switched off
-  ["#swap", "The swap"],
-  ["#how", "How it works"],
-  ["#bench", "Dress-Up Bench"],
-  ["#collect", "Collect"],
-  ["#run", "Dino run"],
-  ["#mascot", "Puzzle"],
-  ["#parents", "For parents"],
-  ["/track", "Track order"],
+  ["/products/boy-shirt-kit", "Boys Kit", "kit"],
+  ["/products/girl-shirt-kit", "Girls Kit", "kit"],
+  ["#swap", "The swap", "page"],
+  ["#how", "How it works", "page"],
+  ["#collect", "Collect", "mobile"],
+  ["#run", "Dino run", "mobile"],
+  ["#mascot", "Puzzle", "mobile"],
+  ["#parents", "For parents", "page"],
+  ["/track", "Track order", "page"],
+  ["/contact", "Contact", "page"],
 ] as const;
 
 export default function Header() {
   const { state, openDrawer } = useShop();
   // Anchors live on the home page; elsewhere they lead back to it.
   const home = usePathname() === "/" ? "" : "/";
-  const count = cartCount(state.cart);
+  const units = cartCount(state.cart); // for the bump: adding another of the same kit still bumps
+  const count = state.cart.length; // the badge: how many different products are in the cart
   const btn = useRef<HTMLButtonElement>(null);
-  const prev = useRef(count);
+  const prev = useRef(units);
   const [menu, setMenu] = useState(false);
   const menuBtn = useRef<HTMLButtonElement>(null);
   const menuEl = useRef<HTMLDivElement>(null);
@@ -34,12 +37,12 @@ export default function Header() {
   // a little bump whenever something lands in the basket
   useGSAP(
     () => {
-      if (count > prev.current && !reducedMotion() && btn.current) {
+      if (units > prev.current && !reducedMotion() && btn.current) {
         gsap.fromTo(btn.current, { scale: 1 }, { scale: 1.14, duration: 0.16, yoyo: true, repeat: 1 });
       }
-      prev.current = count;
+      prev.current = units;
     },
-    { dependencies: [count] }
+    { dependencies: [units] }
   );
 
   // The menu is a real overlay: Escape closes it, the page behind stops
@@ -96,8 +99,8 @@ export default function Header() {
         <img className="mark" src={brandSrc("logo_light", 380)} {...brandSize("logo_light")} alt="" />
       </a>
       <nav aria-label="Main" className="deskNav">
-        {LINKS.map(([href, label]) => (
-          <a key={href} href={href.startsWith("#") ? home + href : href}>
+        {LINKS.filter(([, , kind]) => kind !== "mobile").map(([href, label, kind]) => (
+          <a key={href} href={href.startsWith("#") ? home + href : href} className={kind === "kit" ? "navKit" : undefined}>
             {label}
           </a>
         ))}

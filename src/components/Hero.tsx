@@ -36,7 +36,7 @@ const onMinute = (notify: () => void) => {
   return () => clearInterval(t);
 };
 
-const RIBBON_TEXT = "Free US shipping on every kit · 30-day returns · ";
+const RIBBON_TEXT = "wear. swap. play. · ";
 const RIBBON_REPEATS = 4;
 const RIBBON_PATH = "M-30 400C90 300 170 470 300 390S510 300 640 380";
 
@@ -214,15 +214,15 @@ export default function Hero() {
             <button className="btn" data-scroll="#bench" type="button">
               Shop the kits
             </button>
-            <button className="btn ghost" data-scroll="#bench" type="button">
-              Dress them yourself
+            <button className="btn ghost" data-scroll="#how" type="button">
+              See how it works
             </button>
           </div>
           <div className="trust">
             <span>OEKO-TEX cotton</span>
             <span>40-wash tested</span>
             <span>Height-based sizing</span>
-            <span>30-day returns</span>
+            <span>30-day returns on unworn items</span>
           </div>
         </div>
         <div className="heroTeeHolder">

@@ -10,8 +10,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { CATALOG_TAG } from "@/lib/catalog";
+import { SETTINGS_TAG } from "@/lib/settings";
 
-const ALLOWED_TAGS = new Set([CATALOG_TAG]);
+const ALLOWED_TAGS = new Set([CATALOG_TAG, SETTINGS_TAG]);
 const MAX_SKEW_MS = 5 * 60_000;
 
 const deny = (status: number, message: string) => Response.json({ ok: false, message }, { status });
