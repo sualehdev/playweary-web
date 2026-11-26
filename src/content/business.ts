@@ -7,6 +7,10 @@ export const BUSINESS = {
   hours: "Monday to Friday, 9 am to 5 pm ET",
   replyTime: "one business day",
   effective: "November 26, 2026",
+  social: [
+    { name: "Facebook", href: "https://www.facebook.com/share/1U7igzCAAh/" },
+    { name: "Instagram", href: "https://www.instagram.com/playweary" },
+  ],
 } as const;
 
 /** True while a text still holds a [TODO: ...] placeholder; such sections are never shown. */

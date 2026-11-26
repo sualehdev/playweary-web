@@ -143,6 +143,18 @@ const FOOTER_GROUPS: { title: string; links: { href: string; label: string }[] }
   },
 ];
 
+function SocialIcon({ name }: { name: "Facebook" | "Instagram" }) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="currentColor">
+      {name === "Facebook" ? (
+        <path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.3-1.5 1.5-1.5h1.5V4.4c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.4H8v3h2.6V21h2.9z" />
+      ) : (
+        <path d="M12 7.3A4.7 4.7 0 1 0 12 16.7 4.7 4.7 0 0 0 12 7.3zm0 7.7a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm6-7.9a1.1 1.1 0 1 1-2.2 0 1.1 1.1 0 0 1 2.2 0zM21.9 8.2c-.1-1.6-.4-3-1.6-4.2S17.4 2.5 15.8 2.4C14.2 2.3 9.8 2.3 8.2 2.4 6.6 2.5 5.2 2.8 4 4S2.5 6.6 2.4 8.2c-.1 1.6-.1 6 0 7.6.1 1.6.4 3 1.6 4.2s2.6 1.5 4.2 1.6c1.6.1 6 .1 7.6 0 1.6-.1 3-.4 4.2-1.6s1.5-2.6 1.6-4.2c.1-1.6.1-6 0-7.6zm-2 9.4a3.1 3.1 0 0 1-1.7 1.7c-1.2.5-4 .4-5.3.4s-4.1.1-5.3-.4a3.1 3.1 0 0 1-1.7-1.7c-.5-1.2-.4-4-.4-5.3s-.1-4.1.4-5.3A3.1 3.1 0 0 1 5.6 5.3C6.8 4.8 9.6 4.9 11 4.9s4.1-.1 5.3.4a3.1 3.1 0 0 1 1.7 1.7c.5 1.2.4 4 .4 5.3s.1 4.1-.4 5.3z" />
+      )}
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
     <footer className="f">
@@ -154,6 +166,15 @@ export function Footer() {
             <address>
               <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
             </address>
+            <ul className="fSocial" aria-label="Follow Playweary">
+              {BUSINESS.social.map((s) => (
+                <li key={s.name}>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`${s.name} (opens in a new tab)`}>
+                    <SocialIcon name={s.name} />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
           {FOOTER_GROUPS.map((g) => (
             <nav key={g.title} aria-label={g.title} className="fGroup">

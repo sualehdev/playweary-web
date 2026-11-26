@@ -1,3 +1,4 @@
+import { BUSINESS } from "@/content/business";
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito_Sans } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/content/site";
@@ -52,7 +53,7 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Organization", name: SITE_NAME, url: SITE_URL, logo: `${SITE_URL}/brand/logo_light-760.webp` },
+    { "@type": "Organization", name: SITE_NAME, url: SITE_URL, logo: `${SITE_URL}/brand/logo_light-760.webp`, sameAs: BUSINESS.social.map((s) => s.href) },
     { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
   ],
 };

@@ -649,6 +649,28 @@ footer.f .fBrand img {
 .fBrand address a {
   color: var(--amber);
 }
+.fSocial {
+  display: flex;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+}
+.fSocial a {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #efe4ff;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.15s, color 0.15s;
+}
+.fSocial a:hover,
+.fSocial a:focus-visible {
+  color: var(--ink);
+  background: var(--amber);
+}
 .fGroup {
   display: grid;
   gap: 0.55rem;
