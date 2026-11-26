@@ -1,6 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { brandSize, brandSrc } from "@/content/art";
@@ -21,6 +22,16 @@ const LINKS = [
   ["/track", "Track order", "page"],
   ["/contact", "Contact", "page"],
 ] as const;
+
+/**
+ * A link that never reloads the site. On the home page, `#section` links stay plain anchors
+ * (PageMotion scrolls them smoothly); everywhere else they are client-side navigations.
+ */
+function NavLink({ href, home, ...rest }: { href: string; home: string } & Omit<React.ComponentProps<"a">, "href">) {
+  const target = href.startsWith("#") ? home + href : href;
+  if (target.startsWith("#")) return <a href={target} {...rest} />;
+  return <Link href={target} {...rest} />;
+}
 
 export default function Header() {
   const { state, openDrawer } = useShop();
@@ -95,14 +106,14 @@ export default function Header() {
           <path d={menu ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h11M4 17h16"} />
         </svg>
       </button>
-      <a href={home + "#hero"} className="markLink" aria-label="Playweary, back to the top">
+      <NavLink href="#hero" home={home} className="markLink" aria-label="Playweary, back to the top">
         <img className="mark" src={brandSrc("logo_light", 380)} {...brandSize("logo_light")} alt="" />
-      </a>
+      </NavLink>
       <nav aria-label="Main" className="deskNav">
         {LINKS.filter(([, , kind]) => kind !== "mobile").map(([href, label, kind]) => (
-          <a key={href} href={href.startsWith("#") ? home + href : href} className={kind === "kit" ? "navKit" : undefined}>
+          <NavLink key={href} href={href} home={home} className={kind === "kit" ? "navKit" : undefined}>
             {label}
-          </a>
+          </NavLink>
         ))}
       </nav>
       <button
@@ -123,9 +134,9 @@ export default function Header() {
       <div id="mobileMenu" ref={menuEl} className={menu ? "open" : undefined} inert={!menu} role="dialog" aria-modal="true" aria-label="Menu">
         <nav aria-label="Menu">
           {LINKS.map(([href, label]) => (
-            <a key={href} href={href.startsWith("#") ? home + href : href} onClick={() => setMenu(false)}>
+            <NavLink key={href} href={href} home={home} onClick={() => setMenu(false)}>
               {label}
-            </a>
+            </NavLink>
           ))}
         </nav>
       </div>

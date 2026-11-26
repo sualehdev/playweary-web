@@ -35,6 +35,13 @@ export default function PageMotion() {
 
     // The pinned sections measure before late fonts and images arrive.
     const refresh = () => ScrollTrigger.refresh();
+    // Arriving by a client-side link like /#parents: the pinned sections only settle their
+    // heights after a refresh, so go to the section once they have, not before.
+    const toHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (id) document.getElementById(id)?.scrollIntoView({ behavior: "auto" });
+    };
+    const settle = [setTimeout(() => (ScrollTrigger.refresh(), toHash()), 150), setTimeout(() => (ScrollTrigger.refresh(), toHash()), 900)];
     document.fonts?.ready.then(refresh);
     if (document.readyState !== "complete") window.addEventListener("load", refresh, { once: true });
 
@@ -61,6 +68,7 @@ export default function PageMotion() {
     }
 
     return () => {
+      settle.forEach(clearTimeout);
       document.removeEventListener("click", onClick);
       window.removeEventListener("load", refresh);
     };
