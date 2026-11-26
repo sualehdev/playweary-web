@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * The checkout: contact, US shipping address, shipping speed and payment
- * (cash on delivery; PayPal is shown switched off until launch), with the
+ * (cash on delivery, or PayPal/Venmo/card when the API has PayPal on), with the
  * order summary beside it. Placing the order goes through `placeOrder` in
  * lib/checkout, which sends it to the API; the server's prices and totals are
  * what the confirmation shows.
@@ -15,12 +15,17 @@ import { useEffect, useRef, useState } from "react";
 import { brandSize, brandSrc } from "@/content/art";
 import { money } from "@/content/products";
 import { ApiError } from "@/lib/api";
+import PaypalCheckout from "./PaypalCheckout";
 import {
   US_STATES,
   lookupZip,
   orderSubtotal,
   newIdempotencyKey,
   placeOrder,
+  getPaymentsConfig,
+  type PaymentsConfig,
+  type Order,
+  type PlacedOrder,
   shippingById,
   validate,
   validatePromo,
@@ -255,7 +260,12 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const shipping: ShippingMethod["id"] = "standard";
-  const payment: PaymentMethod = "cod";
+  const [payment, setPayment] = useState<PaymentMethod>("cod");
+  const [payCfg, setPayCfg] = useState<PaymentsConfig["paypal"]>({ enabled: false });
+  useEffect(() => {
+    void getPaymentsConfig().then((c) => setPayCfg(c.paypal));
+  }, []);
+  const paypalOn = payCfg.enabled && payment === "paypal";
   const [busy, setBusy] = useState(false);
   const router = useRouter();
   const [placed, setPlaced] = useState(false);
@@ -354,38 +364,68 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
     if (errors[name]) setErrors((e) => ({ ...e, [name]: undefined }));
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
+  /** Validate the form; returns the order to send, or null after showing what's wrong. */
+  const buildOrder = (method: PaymentMethod): Order | null => {
     const found = validate(fields, isEmail);
     setErrors(found);
     const first = ORDER.find((k) => found[k]);
     if (first) {
       document.getElementById("co-" + first)?.focus();
-      return;
+      return null;
     }
     if (unavailable.length) {
       setServerError(`${productById(unavailable[0].id)?.name ?? "A kit"} isn't available right now. Please remove it to continue.`);
-      return;
+      return null;
     }
+    const { email, phone, ...address } = fields;
+    return { email, phone, address, shipping, payment: method, lines: state.cart, ...(promo ? { promoCode: promo.code } : {}) };
+  };
+
+  // PayPal: one key per distinct order. Same details → same reservation (no duplicates when
+  // the PayPal window is closed and reopened); changed details → a fresh key.
+  const paypalKey = useRef<{ sig: string; key: string } | null>(null);
+  const keyFor = (order: Order) => {
+    const sig = JSON.stringify(order);
+    if (paypalKey.current?.sig !== sig) paypalKey.current = { sig, key: newIdempotencyKey() };
+    return paypalKey.current.key;
+  };
+
+  const finish = (order: PlacedOrder) => {
+    setPlaced(true);
+    clear(); // safe: the "order placed" loader shows while we navigate, not the empty-cart message
+    // Value and item ids ride along in the URL too, for tag rules that match on the address.
+    const ids = [...new Set(order.lines.map((l) => l.id))].join(",");
+    router.push(`/thank-you?code=${encodeURIComponent(order.trackingCode)}&value=${order.total.toFixed(2)}&items=${encodeURIComponent(ids)}`);
+  };
+
+  const showError = (message: string, err?: unknown) => {
+    if (promo && err instanceof ApiError && err.status === 409 && !err.code) setPromo(null); // the server no longer accepts it
+    setServerError(message);
+    requestAnimationFrame(() => alertRef.current?.focus());
+  };
+
+  const paypalError = (message: string, err?: unknown) => {
+    // A rejected or expired checkout (4xx) gets a fresh reservation next time.
+    if (err instanceof ApiError && err.status >= 400 && err.status < 500) paypalKey.current = null;
+    showError(message, err);
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy || paypalOn) return;
+    const order = buildOrder("cod");
+    if (!order) return;
     setBusy(true);
     setServerError("");
     attemptKey.current ??= newIdempotencyKey();
     try {
-      const { email, phone, ...address } = fields;
-      const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart, ...(promo ? { promoCode: promo.code } : {}) }, attemptKey.current, honeypot);
+      const placedOrder = await placeOrder(order, attemptKey.current, honeypot);
       attemptKey.current = null;
-      setPlaced(true);
-      clear(); // safe: the "order placed" loader shows while we navigate, not the empty-cart message
-      // Value and item ids ride along in the URL too, for tag rules that match on the address.
-      const ids = [...new Set(order.lines.map((l) => l.id))].join(",");
-      router.push(`/thank-you?code=${encodeURIComponent(order.trackingCode)}&value=${order.total.toFixed(2)}&items=${encodeURIComponent(ids)}`);
+      finish(placedOrder);
     } catch (err) {
       // A rejected order (4xx) was not stored, so the next attempt gets a fresh key.
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) attemptKey.current = null;
-      if (promo && err instanceof ApiError && err.status === 409) setPromo(null); // the server no longer accepts it
-      setServerError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
-      requestAnimationFrame(() => alertRef.current?.focus());
+      showError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.", err);
     } finally {
       setBusy(false);
     }
@@ -490,7 +530,7 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                   <legend className="coH">Payment</legend>
                   <div className="coChoices">
                     <label className={"coChoice" + (payment === "cod" ? " on" : "")}>
-                      <input type="radio" name="payment" value="cod" checked={payment === "cod"} readOnly />
+                      <input type="radio" name="payment" value="cod" checked={payment === "cod"} onChange={() => { setPayment("cod"); setServerError(""); }} />
                       <span className="coChoiceText">
                         <b>Cash on delivery</b>
                         <span>Pay the courier in cash when your kit arrives.</span>
@@ -499,7 +539,22 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                         💵
                       </span>
                     </label>
+                    {payCfg.enabled ? (
+                      <label className={"coChoice" + (payment === "paypal" ? " on" : "")}>
+                        <input type="radio" name="payment" value="paypal" checked={payment === "paypal"} onChange={() => { setPayment("paypal"); setServerError(""); }} />
+                        <span className="coChoiceText">
+                          <b>PayPal, Venmo or card</b>
+                          <span>Pay now securely with PayPal. No PayPal account needed for cards.</span>
+                        </span>
+                        <span className="coPayPal" aria-hidden="true">
+                          <i>Pay</i>Pal
+                        </span>
+                      </label>
+                    ) : null}
                   </div>
+                  {payCfg.enabled && payCfg.env === "sandbox" ? (
+                    <p className="coSmall">Test mode: PayPal sandbox. No real money moves.</p>
+                  ) : null}
                 </fieldset>
 
                 <div className="coHp" aria-hidden="true">
@@ -525,11 +580,24 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                     {serverError}
                   </p>
                 ) : null}
-                <button className="btn wide coPlace" type="submit" disabled={busy} aria-busy={busy}>
-                  {busy ? "Placing your order…" : `Place order · ${money(total)}`}
-                </button>
+                {paypalOn && payCfg.enabled ? (
+                  <PaypalCheckout
+                    clientId={payCfg.clientId}
+                    prepare={() => buildOrder("paypal")}
+                    idempotencyKey={keyFor}
+                    honeypot={honeypot}
+                    disabled={busy || unavailable.length > 0}
+                    onStart={() => setServerError("")}
+                    onPlaced={finish}
+                    onError={paypalError}
+                  />
+                ) : (
+                  <button className="btn wide coPlace" type="submit" disabled={busy} aria-busy={busy}>
+                    {busy ? "Placing your order…" : `Place order · ${money(total)}`}
+                  </button>
+                )}
                 <p className="coSmall center">
-                  You pay the courier in cash when your kit arrives. By placing your order you agree to our{" "}
+                  {paypalOn ? `You'll pay ${money(total)} in PayPal's secure window.` : "You pay the courier in cash when your kit arrives."} By placing your order you agree to our{" "}
                   <Link href="/returns-refunds">Returns &amp; Refunds Policy</Link>, <Link href="/terms-of-service">Terms of Service</Link> and <Link href="/privacy-policy">Privacy Policy</Link>. Questions? hello@playweary.com
                 </p>
               </form>

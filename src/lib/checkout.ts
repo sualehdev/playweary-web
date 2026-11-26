@@ -130,6 +130,45 @@ export async function placeOrder(order: Order, idempotencyKey: string, honeypot 
   return placed;
 }
 
+/* ---------------------------------------------------------------- PayPal -- */
+
+export type PaymentsConfig = { paypal: { enabled: true; clientId: string; env: "sandbox" | "live"; currency: string } | { enabled: false } };
+
+/** Which payment methods the API has switched on (and the public PayPal client id). */
+export async function getPaymentsConfig(): Promise<PaymentsConfig> {
+  try {
+    return await api<PaymentsConfig>("/v1/payments/config", { timeoutMs: 6_000 });
+  } catch {
+    return { paypal: { enabled: false } }; // checkout still works with cash on delivery
+  }
+}
+
+/**
+ * PayPal step 1: the API prices and reserves the order, then creates the PayPal order from
+ * its own totals. We only get the PayPal order id back; no amount ever comes from the browser.
+ */
+export async function createPaypalOrder(order: Order, idempotencyKey: string, honeypot = ""): Promise<string> {
+  const res = await api<{ paypalOrderId: string }>("/v1/payments/paypal/orders", {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: { ...order, payment: "paypal", ...(honeypot ? { website: honeypot } : {}) },
+    timeoutMs: 20_000,
+  });
+  return res.paypalOrderId;
+}
+
+/** PayPal step 2, after the buyer approves: the API captures and returns the placed order. */
+export async function capturePaypalOrder(paypalOrderId: string): Promise<PlacedOrder> {
+  const res = await api<PlacedOrderResponse>(`/v1/payments/paypal/orders/${encodeURIComponent(paypalOrderId)}/capture`, {
+    method: "POST",
+    body: {},
+    timeoutMs: 30_000,
+  });
+  const placed = fromResponse(res);
+  rememberOrder(placed);
+  return placed;
+}
+
 /** What the server says a code is worth for this cart (advisory: placing the order re-checks). */
 export type PromoPreview = { code: string; label: string; discount: number; itemsDiscount: number; shippingDiscount: number };
 
