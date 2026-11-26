@@ -69,7 +69,7 @@ export default function ThankYou({ code }: { code?: string }) {
     );
   }
 
-  const itemIds = [...new Set(order.lines.map((l) => l.id))].join(",");
+  // const itemIds = [...new Set(order.lines.map((l) => l.id))].join(","); // used by the switched-off tracking box below
 
   const copy = async () => {
     try {
@@ -131,6 +131,8 @@ export default function ThankYou({ code }: { code?: string }) {
           </p>
         </div>
       </div>
+      {/* Order value and item ids box: switched off. The same values are in the page URL
+          (?value=…&items=…) and in the `purchase` event, which is what tracking reads.
       <div
         className="coTrack"
         id="pw-order"
@@ -148,6 +150,7 @@ export default function ThankYou({ code }: { code?: string }) {
           <b>{itemIds.split(",").join(", ")}</b>
         </div>
       </div>
+      */}
       <div className="coSummary card">
         <h2 className="coH">Order summary</h2>
         <ul className="coLines">
