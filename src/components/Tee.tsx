@@ -65,7 +65,7 @@ export default function Tee({
       <svg className="teeSvg" viewBox="0 0 700 700" aria-hidden="true">
         <path
           className="teeBody"
-          d="M265 55C275 130 425 130 435 55L580 55L665 140L630 265L580 225L580 627Q580 647 560 647L140 647Q120 647 120 627L120 225L70 265L35 140L120 55Z"
+          d="M265 55C275 130 425 130 435 55L580 55L650 120L676 455L592 475L580 262L580 627Q580 647 560 647L140 647Q120 647 120 627L120 262L108 475L24 455L50 120L120 55Z"
           style={{ fill: shirt.body, stroke: shirt.line }}
           strokeWidth="5"
           strokeLinejoin="round"

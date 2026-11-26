@@ -12,7 +12,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_SIZE, SIZES, kitId, money } from "@/content/products";
-import { pieceSize, pieceSrc } from "@/content/art";
+import Figure from "./Figure";
 import { SHIRTS, SHIRT_SIZE, shirtSrc } from "@/content/shirts";
 import type { CharacterId } from "@/content/characters";
 import { flyToCart } from "@/lib/effects";
@@ -165,7 +165,9 @@ export default function ShirtGallery({ character: fixed, heading: Heading = "h2"
                   className={"variantBox" + (i === current ? " on" : "")}
                   onClick={() => go(i)}
                 >
-                  <img src={pieceSrc(character, `hair${i + 1}`, 256)} {...pieceSize(character, `hair${i + 1}`, 256)} alt="" />
+                  <span className="variantFig" aria-hidden="true">
+                    <Figure character={character} set={(i + 1) as 1 | 2 | 3} />
+                  </span>
                   <small>Variant {i + 1}</small>
                 </button>
               ))}

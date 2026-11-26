@@ -67,11 +67,16 @@
   outline: 3px solid var(--violet);
   outline-offset: 2px;
 }
-.variantBox img[width][height] {
-  width: 100%;
-  height: 84px;
-  object-fit: contain;
+/* the whole set (hair, outfit, shoes) on the character, cropped to the figure */
+.variantFig {
   display: block;
+  height: 112px;
+  overflow: hidden;
+  position: relative;
+}
+.variantFig .figure {
+  width: 175%;
+  margin: -37% 0 0 -37.5%;
 }
 .variantBox small {
   display: block;
