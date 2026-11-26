@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito_Sans } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/content/site";
+import CookieBanner from "@/components/CookieBanner";
 import { GtmHead, GtmNoscript } from "@/components/Gtm";
 import "./globals.css";
+import "@/styles/consent.css";
 import "@/styles/policy.css";
 
 const display = Baloo_2({
@@ -61,6 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <GtmNoscript />
         <GtmHead />
         {children}
+        <CookieBanner />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </body>
     </html>

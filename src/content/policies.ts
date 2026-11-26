@@ -288,7 +288,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
   {
     slug: "cookie-policy",
     kind: "legal",
-    summary: ["Essential cookies keep your basket and checkout working.", "Analytics and advertising cookies stay off until you accept them.", "You can change your choice any time in your browser."],
+    summary: ["Essential cookies keep your basket and checkout working.", "Analytics and advertising cookies stay off until you accept them.", "You can change your choice any time with the Cookie settings link in the footer."],
     related: ["privacy-policy", "terms-of-service", "contact"],
     title: "Cookie Policy",
     link: "Cookie Policy",
@@ -304,7 +304,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
           "Advertising (Google, Meta): measure whether our ads lead to orders. Only after you accept.",
         ],
       },
-      { h: "Your choice", p: ["Marketing and analytics tags are off until you accept them. You can change your choice any time through your browser's cookie settings, or write to us to opt out of the sharing of your data for advertising."] },
+      { h: "Your choice", p: ["Marketing and analytics tags are off until you accept them. You can change your choice any time with the Cookie settings link at the bottom of every page, or through your browser's settings. Turning off advertising cookies opts you out of the sharing of your data for advertising, and you can also write to us."] },
       { h: "More", p: ["See our Privacy Policy for how we handle personal information."] },
     ],
   },

@@ -7,6 +7,7 @@ import { BUSINESS } from "@/content/business";
 import { POLICY_BY_SLUG } from "@/content/policies";
 import { getPromo } from "@/lib/settings.server";
 import { promoLoop } from "@/lib/settings";
+import CookieSettingsLink from "./CookieSettingsLink";
 
 /** Decoration from the layout PDF. Always hidden from assistive tech. */
 export function Decor({ name, className }: { name: Parameters<typeof decorSrc>[0]; className: string }) {
@@ -162,6 +163,7 @@ export function Footer() {
                   {l.label}
                 </Link>
               ))}
+              {g.title === "Company" ? <CookieSettingsLink /> : null}
             </nav>
           ))}
         </div>

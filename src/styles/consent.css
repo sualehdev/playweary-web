@@ -1,0 +1,138 @@
+/* ---------- cookie banner ---------- */
+.fLinkBtn {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #efe4ff;
+  font: inherit;
+  font-size: 0.97rem;
+  cursor: pointer;
+  text-align: left;
+}
+.fLinkBtn:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ckBanner {
+  position: fixed;
+  z-index: 90;
+  left: 50%;
+  bottom: 1rem;
+  width: min(760px, calc(100vw - 1.5rem));
+  max-height: calc(100svh - 2rem);
+  overflow: auto;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem 1.4rem;
+  align-items: center;
+  padding: 1.2rem 1.4rem;
+  background: #fff;
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 var(--violet), 0 24px 50px rgba(32, 2, 66, 0.3);
+  animation: ckIn 0.35s ease-out both;
+  outline: none;
+}
+.ckBody h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.25rem;
+}
+.ckBody p {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+.ckBody a {
+  color: var(--violet);
+  font-weight: 700;
+}
+.ckActions {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: stretch;
+  min-width: 190px;
+}
+.ckActions .btn {
+  white-space: nowrap;
+}
+.ckLink {
+  padding: 0.3rem;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 700 0.9rem var(--display);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ckOptions {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.ckRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(159, 62, 255, 0.07);
+  cursor: pointer;
+}
+.ckRow span {
+  display: grid;
+  gap: 0.1rem;
+}
+.ckRow small {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+.ckRow input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--violet);
+  cursor: pointer;
+}
+.ckLocked {
+  opacity: 0.75;
+  cursor: default;
+}
+.ckLocked input {
+  cursor: default;
+}
+@keyframes ckIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+}
+@media (max-width: 620px) {
+  .ckBanner {
+    grid-template-columns: 1fr;
+    bottom: 0.6rem;
+    padding: 1rem;
+  }
+  .ckActions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ckActions .ckLink {
+    grid-column: 1 / -1;
+  }
+  .ckActions .btn {
+    padding-inline: 0.8rem;
+    font-size: 0.95rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ckBanner {
+    animation: none;
+  }
+}
