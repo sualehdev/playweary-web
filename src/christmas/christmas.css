@@ -544,8 +544,12 @@ html[data-xmas-over] .xBand { display: none; }
 }
 @media (max-width: 640px) {
   .xPopArt { min-height: 0; padding-top: 2rem; max-height: none; }
-  .xPopArt .xTree, .xPopArt .xSanta { width: auto; height: 150px; }
-  .xSash { bottom: 8px; }
+  /* img[width][height]{height:auto} outranks a class pair, so the extra element + class here is deliberate */
+  .xPop .xPopArt img.xTree, .xPop .xPopArt img.xSanta { width: auto; height: 128px; margin: 0; }
+  .xPop .xPopArt svg.xTree, .xPop .xPopArt svg.xSanta { width: auto; height: 128px; }
+  .xPopArt { display: flex; align-items: flex-end; justify-content: center; gap: 0.5rem; padding: 2.4rem 0.5rem 2.2rem; }
+  .xPopBody { padding: 1.2rem 1.1rem 1.2rem; }
+  .xSash { bottom: 6px; font-size: 0.72rem; }
 }
 
 /* ---------- Santa badge in the home gift band ---------- */
@@ -661,3 +665,130 @@ html[data-xmas-over] .xBand { display: none; }
 
 .xSleighImg { display: block; width: 250px; height: auto; margin: -34px 0 -30px; }
 @media (max-width: 700px) { .xSleighImg { width: 160px; margin: -20px 0 -18px; } }
+
+/* phones: keep the floating Santa small so it never hides content */
+@media (max-width: 640px) {
+  .xGiftBtn { width: 76px; height: 76px; right: 10px; bottom: 14px; }
+  .xmas[data-product] .xGiftBtn { bottom: 92px; }
+  .xGiftBox { width: 26px; height: 26px; left: -8px; }
+  .xGiftTag { font-size: 0.6rem; padding: 0.15em 0.6em; }
+}
+
+/* ---------- "Special offer" badge + code chip in the pop-up ---------- */
+.xOfferBadge {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.xOfferBadge .xOfferSanta {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #2b0259;
+  border: 4px solid #fff;
+  outline: 3px dashed #e0243f;
+  outline-offset: 2px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.xOfferBadge b {
+  margin-top: -14px;
+  padding: 0.2em 0.9em;
+  border-radius: 999px;
+  background: #e0243f;
+  color: #fff;
+  border: 2px solid #fff;
+  font: 800 0.78rem var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 #a3123c;
+  animation: xBadgePulse 1.8s ease-in-out infinite;
+}
+@keyframes xBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.xCode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 2px dashed #e0243f;
+  border-radius: 14px;
+  background: #fff4f6;
+  color: #200242;
+  font-weight: 700;
+}
+.xCode b {
+  font-family: var(--display);
+  letter-spacing: 0.08em;
+  color: #e0243f;
+}
+.xCode button {
+  flex: 0 0 auto;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 2px solid #200242;
+  background: #fff;
+  color: #200242;
+  cursor: pointer;
+}
+@media (max-width: 640px) {
+  .xOfferBadge { top: 10px; left: 8px; }
+  .xPop .xOfferBadge img.xOfferSanta, .xPop .xOfferBadge svg.xOfferSanta { width: 64px; height: 64px; }
+  .xOfferBadge b { font-size: 0.64rem; margin-top: -10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xOfferBadge b { animation: none; }
+}
+
+/* ---------- starburst "offer" badge on the sticky Santa ---------- */
+.xGiftBurst {
+  position: absolute;
+  top: -22px;
+  left: -26px;
+  z-index: 3;
+  width: 86px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  background: #fcc006;
+  clip-path: polygon(50% 0, 61% 14%, 79% 9%, 82% 27%, 100% 33%, 90% 50%, 100% 67%, 82% 73%, 79% 91%, 61% 86%, 50% 100%, 39% 86%, 21% 91%, 18% 73%, 0 67%, 10% 50%, 0 33%, 18% 27%, 21% 9%, 39% 14%);
+  transform: rotate(-12deg);
+  animation: xBadgePulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.xGiftBurst b {
+  max-width: 60px;
+  text-align: center;
+  font: 800 0.82rem/1.05 var(--display);
+  text-transform: uppercase;
+  color: #8f0f2c;
+}
+.xGiftTag { white-space: nowrap; }
+@media (max-width: 900px) {
+  .xGiftBurst { top: -18px; left: -22px; width: 70px; height: 70px; }
+  .xGiftBurst b { font-size: 0.66rem; max-width: 48px; }
+}
+@media (max-width: 640px) {
+  .xGiftBurst { top: -16px; left: -20px; width: 60px; height: 60px; }
+  .xGiftBurst b { font-size: 0.58rem; max-width: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xGiftBurst { animation: none; }
+}
+
+/* phones: the tag would run off the screen edge, so it just says "Offer" */
+@media (max-width: 640px) {
+  .xGiftTag .xLong { display: none; }
+}

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { track } from "@/lib/track";
 import { Present, Santa, Tree } from "./art";
 import Pic from "./Pic";
-import { BANNER_KEY, KITS, POPUP_KEY, POPUP_ROUTES, QUIET_ROUTES, XMAS_END } from "./config";
+import { BANNER_KEY, KITS, OFFER, POPUP_KEY, POPUP_ROUTES, QUIET_ROUTES, XMAS_END } from "./config";
 import GiftPopup from "./GiftPopup";
 import Lights from "./Lights";
 import Sleigh from "./Sleigh";
@@ -110,7 +110,14 @@ export default function ChristmasLayer() {
             href={KITS.girl.href}
             onClick={() => track("xmas_banner_click")}
           >
-            <Present className="xBannerIcon" hue="red" /> Gift a Playweary kit this Christmas
+            <Present className="xBannerIcon" hue="red" />{" "}
+            {OFFER.on ? (
+              <>
+                Special Christmas offer: {OFFER.text} with code <b>{OFFER.code}</b>
+              </>
+            ) : (
+              "Gift a Playweary kit this Christmas"
+            )}
           </Link>
           <button
             type="button"
@@ -130,7 +137,7 @@ export default function ChristmasLayer() {
       <button
         type="button"
         className="xGiftBtn"
-        aria-label="Christmas gift ideas"
+        aria-label={OFFER.on ? `Special Christmas offer: ${OFFER.text} with code ${OFFER.code}` : "Christmas gift ideas"}
         onClick={() => {
           track("xmas_button_click");
           setPopup(true);
@@ -138,7 +145,19 @@ export default function ChristmasLayer() {
       >
         <Pic name="santa" formats={["gif", "png"]} width={288} height={288} className="xGiftSanta" fallback={<Santa className="xGiftSanta" />} />
         <Present className="xGiftBox" hue="violet" />
-        <span className="xGiftTag">Gifts</span>
+        {OFFER.on ? (
+          <span className="xGiftBurst" aria-hidden="true">
+            <b>{OFFER.text}</b>
+          </span>
+        ) : null}
+        <span className="xGiftTag">{OFFER.on ? (
+            <>
+              <span className="xLong">Christmas </span>offer
+            </>
+          ) : (
+            "Gifts"
+          )}
+        </span>
       </button>
       {popup ? <GiftPopup onClose={close} /> : null}
     </div>

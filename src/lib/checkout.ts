@@ -35,12 +35,14 @@ export type Order = {
   shipping: ShippingMethod["id"];
   payment: PaymentMethod;
   lines: CartLine[];
+  /** Optional promo code; the server re-checks it and prices the discount. */
+  promoCode?: string;
 };
 
 /** A line as the server priced it. */
 export type PlacedLine = CartLine & { name: string; unitPrice: number; lineTotal: number };
 
-export type PlacedOrder = Omit<Order, "lines"> & {
+export type PlacedOrder = Omit<Order, "lines" | "promoCode"> & {
   number: string;
   /** Private code for the tracking link (/track?code=…). */
   trackingCode: string;
@@ -49,6 +51,9 @@ export type PlacedOrder = Omit<Order, "lines"> & {
   lines: PlacedLine[];
   subtotal: number;
   shippingCost: number;
+  /** Promo discount in dollars (0 when none); `total` is already net of it. */
+  discount: number;
+  promoCode: string | null;
   total: number;
   /** Earliest and latest delivery dates, ISO. */
   arrives: [string, string];
@@ -77,15 +82,16 @@ export function addBusinessDays(from: Date, days: number) {
 }
 
 /** POST /v1/orders response (money in cents). */
-type PlacedOrderResponse = Omit<PlacedOrder, "lines" | "subtotal" | "shippingCost" | "total"> & {
+type PlacedOrderResponse = Omit<PlacedOrder, "lines" | "subtotal" | "shippingCost" | "total" | "discount" | "promoCode"> & { promoCode?: string | null } & {
   lines: (CartLine & { name: string; unitPriceCents: number; lineTotalCents: number })[];
   subtotalCents: number;
   shippingCents: number;
+  discountCents?: number;
   totalCents: number;
 };
 
 export function fromResponse(r: PlacedOrderResponse): PlacedOrder {
-  const { subtotalCents, shippingCents, totalCents, lines, ...rest } = r;
+  const { subtotalCents, shippingCents, discountCents, totalCents, lines, ...rest } = r;
   return {
     ...rest,
     lines: lines.map(({ unitPriceCents, lineTotalCents, ...l }) => ({
@@ -95,6 +101,8 @@ export function fromResponse(r: PlacedOrderResponse): PlacedOrder {
     })),
     subtotal: cents(subtotalCents),
     shippingCost: cents(shippingCents),
+    discount: cents(discountCents ?? 0),
+    promoCode: r.promoCode ?? null,
     total: cents(totalCents),
   };
 }
@@ -120,6 +128,23 @@ export async function placeOrder(order: Order, idempotencyKey: string, honeypot 
   const placed = fromResponse(res);
   rememberOrder(placed);
   return placed;
+}
+
+/** What the server says a code is worth for this cart (advisory: placing the order re-checks). */
+export type PromoPreview = { code: string; label: string; discount: number; itemsDiscount: number; shippingDiscount: number };
+
+export async function validatePromo(code: string, email: string, lines: CartLine[]): Promise<PromoPreview> {
+  const res = await api<{ code: string; label: string; discountCents: number; itemsCents: number; shippingCents: number }>("/v1/promo/validate", {
+    method: "POST",
+    body: { code, email, lines },
+  });
+  return {
+    code: res.code,
+    label: res.label,
+    discount: cents(res.discountCents),
+    itemsDiscount: cents(res.itemsCents),
+    shippingDiscount: cents(res.shippingCents),
+  };
 }
 
 /** City and state for a US ZIP code (public ZIP database). Returns null on any failure: the shopper just types them. */

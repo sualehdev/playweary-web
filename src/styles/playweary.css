@@ -355,7 +355,7 @@ header.bar {
   color: #fff;
 }
 @media (max-width: 1180px) {
-  .bar nav a {
+  .bar .deskNav a {
     display: none;
   }
 }
@@ -2843,4 +2843,16 @@ footer.f .flinks a {
   .coDone {
     animation: none;
   }
+}
+
+/* The phone menu reuses the header's nav markup: undo the desktop nav's layout and dimming. */
+#mobileMenu nav {
+  margin: 0;
+  justify-self: center;
+  width: 100%;
+  justify-items: center;
+}
+#mobileMenu nav a,
+#mobileMenu nav a:hover {
+  opacity: 1;
 }

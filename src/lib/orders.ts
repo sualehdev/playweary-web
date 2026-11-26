@@ -56,6 +56,9 @@ export type TrackedOrder = {
   lines: TrackedLine[];
   subtotal: number;
   shippingCost: number;
+  /** Promo discount in dollars (0 when none); `total` is already net of it. */
+  discount: number;
+  promoCode: string | null;
   total: number;
   arrives: [string, string];
   isBackorder: boolean;
@@ -70,20 +73,23 @@ type LimitedResponse = Pick<
   "number" | "status" | "stage" | "placedAt" | "arrives" | "isBackorder" | "carrier" | "carrierTrackingNumber" | "timeline"
 > & { limited: true };
 
-type TrackResponse = Omit<TrackedOrder, "lines" | "subtotal" | "shippingCost" | "total"> & {
+type TrackResponse = Omit<TrackedOrder, "lines" | "subtotal" | "shippingCost" | "total" | "discount" | "promoCode"> & { promoCode?: string | null } & {
   lines: (Omit<TrackedLine, "unitPrice" | "lineTotal"> & { unitPriceCents: number; lineTotalCents: number })[];
   subtotalCents: number;
   shippingCents: number;
+  discountCents?: number;
   totalCents: number;
 };
 
 function fromResponse(r: TrackResponse): TrackedOrder {
-  const { subtotalCents, shippingCents, totalCents, lines, ...rest } = r;
+  const { subtotalCents, shippingCents, discountCents, totalCents, lines, ...rest } = r;
   return {
     ...rest,
     lines: lines.map(({ unitPriceCents, lineTotalCents, ...l }) => ({ ...l, unitPrice: cents(unitPriceCents), lineTotal: cents(lineTotalCents) })),
     subtotal: cents(subtotalCents),
     shippingCost: cents(shippingCents),
+    discount: cents(discountCents ?? 0),
+    promoCode: r.promoCode ?? null,
     total: cents(totalCents),
   };
 }
@@ -122,6 +128,8 @@ export async function trackByNumber(number: string): Promise<TrackedOrder> {
     lines: [],
     subtotal: 0,
     shippingCost: 0,
+    discount: 0,
+    promoCode: null,
     total: 0,
   };
 }

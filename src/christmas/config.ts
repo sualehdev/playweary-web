@@ -15,6 +15,19 @@ export const KITS = {
   boy: { href: "/products/boy-shirt-kit", label: "Shop the boy kit" },
 } as const;
 
+/**
+ * The Christmas offer. Set both env vars (and create the same code in the admin's Promotions
+ * page) and the pop-up, banner and button say "Special Christmas offer" with the code.
+ * Leave them unset and the layer stays gift-only: it never advertises a discount that
+ * does not exist.   NEXT_PUBLIC_XMAS_CODE=XMAS10   NEXT_PUBLIC_XMAS_OFFER="10% off"
+ */
+const code = (process.env.NEXT_PUBLIC_XMAS_CODE ?? "").trim().toUpperCase();
+const text = (process.env.NEXT_PUBLIC_XMAS_OFFER ?? "").trim();
+export const OFFER = { code, text, on: Boolean(code && text) } as const;
+
+/** sessionStorage key the checkout reads to pre-fill the promo box. */
+export const PROMO_PREFILL_KEY = "pw:promo-code";
+
 /** localStorage keys */
 export const POPUP_KEY = "pw:xmas-popup";
 export const BANNER_KEY = "pw:xmas-banner";

@@ -143,6 +143,12 @@ function OrderCard({ order }: { order: TrackedOrder }) {
             );
           })}
         </ul>
+        {order.discount > 0 ? (
+          <p className="tkTotal" style={{ fontSize: "0.95rem", color: "#0e5a22" }}>
+            <span>Discount{order.promoCode ? ` (${order.promoCode})` : ""}</span>
+            <b>−{money(order.discount)}</b>
+          </p>
+        ) : null}
         <p className="tkTotal">
           <span>Total {paid ? "(paid)" : "(due on delivery)"}</span>
           <b>{money(order.total)}</b>

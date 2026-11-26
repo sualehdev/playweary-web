@@ -1,0 +1,92 @@
+/* Promo code box in the checkout order summary */
+.coPromo {
+  margin: 0 0 1rem;
+  border-top: 1px solid rgba(32, 2, 66, 0.12);
+  padding-top: 0.9rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.coPromoToggle {
+  justify-self: start;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  color: var(--violet, #7b2dff);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.coPromoRow {
+  display: flex;
+  gap: 0.5rem;
+}
+.coPromoRow input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid rgba(32, 2, 66, 0.25);
+  border-radius: 12px;
+  background: #fff;
+  color: #200242;
+}
+.coPromoRow input:focus {
+  outline: 3px solid rgba(123, 45, 255, 0.35);
+  border-color: #7b2dff;
+}
+.coPromoRow button {
+  flex: 0 0 auto;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.65rem 1.1rem;
+  border-radius: 12px;
+  border: 2px solid #200242;
+  background: #200242;
+  color: #fff;
+  cursor: pointer;
+}
+.coPromoRow button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.coPromoMsg {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #b3122f;
+}
+.coPromoHint {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+.coPromoChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: #e6f8e8;
+  color: #0e5a22;
+  font-weight: 800;
+}
+.coPromoChip button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.coTotals .coDiscount {
+  color: #0e5a22;
+  font-weight: 800;
+}

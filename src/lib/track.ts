@@ -27,6 +27,8 @@ export type PurchaseOrder = {
   number: string;
   total: number;
   shippingCost: number;
+  discount?: number;
+  promoCode?: string | null;
   lines: { id: string; name: string; size: string; q: number; unitPrice: number }[];
 };
 
@@ -41,6 +43,7 @@ export function purchaseEvent(o: PurchaseOrder) {
       value: o.total,
       currency: "USD",
       shipping: o.shippingCost,
+      ...(o.promoCode ? { coupon: o.promoCode, discount: o.discount } : {}),
       items: o.lines.map((l) => ({
         item_id: l.id,
         item_name: l.name,

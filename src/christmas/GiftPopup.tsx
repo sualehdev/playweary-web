@@ -1,15 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/track";
 import { Present, Santa, Tree } from "./art";
 import Pic from "./Pic";
-import { KITS } from "./config";
+import { KITS, OFFER, PROMO_PREFILL_KEY } from "./config";
 
 /** The gift pop-up. A proper dialog: focus moves in, Tab stays inside, Esc and the backdrop close it. */
 export default function GiftPopup({ onClose }: { onClose: () => void }) {
   const box = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  // The checkout pre-fills its promo box with this, so the offer is one tap from the cart.
+  const keepCode = () => {
+    if (!OFFER.on) return;
+    try {
+      sessionStorage.setItem(PROMO_PREFILL_KEY, OFFER.code);
+    } catch {
+      /* storage unavailable: they can still type the code */
+    }
+  };
+  const copy = () => {
+    keepCode();
+    void navigator.clipboard?.writeText(OFFER.code).then(() => setCopied(true), () => undefined);
+  };
 
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
@@ -65,15 +79,37 @@ export default function GiftPopup({ onClose }: { onClose: () => void }) {
           <span className="xGlow" />
           <Pic name="tree" formats={["png"]} width={453} height={640} className="xTree" fallback={<Tree />} />
           <Pic name="santa" formats={["png"]} width={472} height={640} className="xSanta" fallback={<Santa />} />
-          <span className="xSash">Christmas gifts</span>
+          <span className="xSash">{OFFER.on ? "Christmas offer" : "Christmas gifts"}</span>
+          <span className="xOfferBadge">
+            <Pic name="santa" formats={["gif", "png"]} width={288} height={288} className="xOfferSanta" fallback={<Santa className="xOfferSanta" />} />
+            <b>{OFFER.on ? "Special offer" : "Gift ideas"}</b>
+          </span>
         </div>
         <div className="xPopBody">
           <p className="xKicker">
-            <Present className="xKickIcon" hue="red" /> A gift they will open first
+            <Present className="xKickIcon" hue="red" /> {OFFER.on ? "Special Christmas offer" : "A gift they will open first"}
           </p>
           <h2 id="xPopTitle">
-            Give them a gift that <em>keeps on giving</em>
+            {OFFER.on ? (
+              <>
+                {OFFER.text} <em>this Christmas</em>
+              </>
+            ) : (
+              <>
+                Give them a gift that <em>keeps on giving</em>
+              </>
+            )}
           </h2>
+          {OFFER.on ? (
+            <div className="xCode">
+              <span>
+                Use code <b>{OFFER.code}</b> at checkout
+              </span>
+              <button type="button" onClick={copy}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+          ) : null}
           <ul className="xPopList">
             <li>
               <b>27</b> different looks from one shirt
@@ -82,10 +118,10 @@ export default function GiftPopup({ onClose }: { onClose: () => void }) {
             <li>No batteries, no screens, and it all goes in the same wash</li>
           </ul>
           <div className="xPopCtas">
-            <Link className="btn xShine" href={KITS.girl.href} onClick={() => { track("xmas_popup_click", { kit: "girl" }); onClose(); }}>
+            <Link className="btn xShine" href={KITS.girl.href} onClick={() => { keepCode(); track("xmas_popup_click", { kit: "girl" }); onClose(); }}>
               {KITS.girl.label}
             </Link>
-            <Link className="btn pink xShine" href={KITS.boy.href} onClick={() => { track("xmas_popup_click", { kit: "boy" }); onClose(); }}>
+            <Link className="btn pink xShine" href={KITS.boy.href} onClick={() => { keepCode(); track("xmas_popup_click", { kit: "boy" }); onClose(); }}>
               {KITS.boy.label}
             </Link>
           </div>

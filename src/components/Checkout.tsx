@@ -23,9 +23,11 @@ import {
   placeOrder,
   shippingById,
   validate,
+  validatePromo,
   type Errors,
   type Fields,
   type PaymentMethod,
+  type PromoPreview,
   type ShippingMethod,
 } from "@/lib/checkout";
 import { isEmail } from "@/lib/newsletter";
@@ -34,6 +36,7 @@ import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 import OrderLoader from "./OrderLoader";
 import { Footer } from "./sections";
+import "@/styles/promo.css";
 
 const EMPTY: Fields = { email: "", phone: "", firstName: "", lastName: "", line1: "", line2: "", city: "", state: "", zip: "" };
 const ORDER: (keyof Fields)[] = ["email", "phone", "firstName", "lastName", "line1", "city", "state", "zip"];
@@ -90,10 +93,17 @@ function Summary({
   shipping,
   editable,
   lines,
+  discount = 0,
+  promoCode,
+  promoBox,
 }: {
   shipping: ShippingMethod;
   editable: boolean;
   lines: CartLine[];
+  /** Dollars off, from a validated promo code. */
+  discount?: number;
+  promoCode?: string;
+  promoBox?: React.ReactNode;
 }) {
   const { setQty, productById } = useShop();
   const subtotal = orderSubtotal(lines, productById);
@@ -134,6 +144,7 @@ function Summary({
           );
         })}
       </ul>
+      {promoBox}
       <dl className="coTotals">
         <div>
           <dt>Subtotal</dt>
@@ -143,13 +154,99 @@ function Summary({
           <dt>Shipping ({shipping.name})</dt>
           <dd>{shipCost ? money(shipCost) : "Free"}</dd>
         </div>
+        {discount > 0 ? (
+          <div className="coDiscount">
+            <dt>Discount ({promoCode})</dt>
+            <dd>−{money(discount)}</dd>
+          </div>
+        ) : null}
         <div className="coGrand">
           <dt>Total</dt>
-          <dd>{money(subtotal + shipCost)}</dd>
+          <dd>{money(Math.max(0, subtotal + shipCost - discount))}</dd>
         </div>
       </dl>
       <p className="coSmall">Sales tax, where it applies, is included in the price.</p>
     </div>
+  );
+}
+
+/** A promo code another part of the site left for the checkout (empty on the server and when none). */
+function carriedCode(): string {
+  try {
+    return (typeof sessionStorage !== "undefined" && sessionStorage.getItem("pw:promo-code")) || "";
+  } catch {
+    return "";
+  }
+}
+
+/** "Have a promo code?": the server says what it is worth; placing the order checks it again. */
+function PromoBox({
+  promo,
+  email,
+  busy,
+  message,
+  onApply,
+  onRemove,
+}: {
+  promo: PromoPreview | null;
+  email: string;
+  busy: boolean;
+  message: string;
+  onApply: (code: string) => void;
+  onRemove: () => void;
+}) {
+  // A code carried over from a promo (e.g. the Christmas pop-up) opens the box pre-filled.
+  const [code, setCode] = useState(carriedCode);
+  const [open, setOpen] = useState(code !== "");
+  const emailOk = isEmail(email);
+  if (promo) {
+    return (
+      <div className="coPromo">
+        <div className="coPromoChip" role="status">
+          <span>
+            {promo.code} · {promo.label}
+          </span>
+          <button type="button" onClick={onRemove}>
+            Remove
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (!open) {
+    return (
+      <div className="coPromo">
+        <button type="button" className="coPromoToggle" onClick={() => setOpen(true)}>
+          Have a promo code?
+        </button>
+      </div>
+    );
+  }
+  return (
+    <form
+      className="coPromo"
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (code.trim() && emailOk && !busy) onApply(code.trim());
+      }}
+    >
+      <label htmlFor="co-promo" className="coPromoHint" style={{ fontWeight: 800 }}>
+        Promo code
+      </label>
+      <div className="coPromoRow">
+        <input id="co-promo" autoFocus value={code} onChange={(e) => setCode(e.target.value)} maxLength={40} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Enter code" />
+        <button type="submit" disabled={!code.trim() || !emailOk || busy}>
+          {busy ? "Checking…" : "Apply"}
+        </button>
+      </div>
+      {!emailOk ? <p className="coPromoHint">Enter your email above first, so we can check the code is yours to use.</p> : null}
+      {message ? (
+        <p className="coPromoMsg" role="alert">
+          {message}
+        </p>
+      ) : null}
+    </form>
   );
 }
 
@@ -171,9 +268,47 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
 
   // Standard is the only method; its price is an admin setting passed in from the page.
   const ship: ShippingMethod = { ...shippingById(shipping), price: shippingCents / 100 };
-  const total = orderSubtotal(state.cart, productById) + ship.price;
+  const [promo, setPromo] = useState<PromoPreview | null>(null);
+  const [promoMsg, setPromoMsg] = useState("");
+  const [promoBusy, setPromoBusy] = useState(false);
+  const total = Math.max(0, orderSubtotal(state.cart, productById) + ship.price - (promo?.discount ?? 0));
   const unavailable = state.cart.filter((l) => productById(l.id)?.available === false);
   const empty = state.hydrated && cartCount(state.cart) === 0;
+
+  const applyPromo = async (code: string) => {
+    setPromoBusy(true);
+    setPromoMsg("");
+    try {
+      setPromo(await validatePromo(code, fields.email.trim().toLowerCase(), state.cart));
+    } catch (err) {
+      setPromoMsg(err instanceof ApiError ? err.message : "Could not check that code. Please try again.");
+    } finally {
+      setPromoBusy(false);
+    }
+  };
+
+  // The discount depends on the email and the cart: if either changes, check the code again.
+  const cartKey = state.cart.map((l) => `${l.id}:${l.size}:${l.q}`).join("|");
+  const emailKey = fields.email.trim().toLowerCase();
+  const appliedCode = promo?.code;
+  useEffect(() => {
+    if (!appliedCode) return;
+    let stale = false;
+    const t = setTimeout(() => {
+      validatePromo(appliedCode, emailKey, state.cart)
+        .then((p) => !stale && setPromo(p))
+        .catch((err) => {
+          if (stale) return;
+          setPromo(null);
+          setPromoMsg(err instanceof ApiError ? err.message : "Please apply your code again.");
+        });
+    }, 600);
+    return () => {
+      stale = true;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedCode, emailKey, cartKey]);
 
   useEffect(() => {
     if (placed) top.current?.scrollIntoView({ block: "start" });
@@ -238,7 +373,7 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
     attemptKey.current ??= newIdempotencyKey();
     try {
       const { email, phone, ...address } = fields;
-      const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart }, attemptKey.current, honeypot);
+      const order = await placeOrder({ email, phone, address, shipping, payment, lines: state.cart, ...(promo ? { promoCode: promo.code } : {}) }, attemptKey.current, honeypot);
       attemptKey.current = null;
       setPlaced(true);
       clear(); // safe: the "order placed" loader shows while we navigate, not the empty-cart message
@@ -248,6 +383,7 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
     } catch (err) {
       // A rejected order (4xx) was not stored, so the next attempt gets a fresh key.
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) attemptKey.current = null;
+      if (promo && err instanceof ApiError && err.status === 409) setPromo(null); // the server no longer accepts it
       setServerError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
       requestAnimationFrame(() => alertRef.current?.focus());
     } finally {
@@ -399,7 +535,14 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
               </form>
 
               <aside className="coAside">
-                <Summary shipping={ship} editable lines={state.cart} />
+                <Summary
+                  shipping={ship}
+                  editable
+                  lines={state.cart}
+                  discount={promo?.discount}
+                  promoCode={promo?.code}
+                  promoBox={<PromoBox promo={promo} email={fields.email} busy={promoBusy} message={promoMsg} onApply={(c) => void applyPromo(c)} onRemove={() => { setPromo(null); setPromoMsg(""); }} />}
+                />
               </aside>
             </div>
           </>

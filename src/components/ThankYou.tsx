@@ -10,6 +10,7 @@ import { trackPurchase } from "@/lib/track";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 import OrderLoader from "./OrderLoader";
+import "@/styles/promo.css";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 
@@ -176,6 +177,12 @@ export default function ThankYou({ code }: { code?: string }) {
             <dt>Shipping ({shippingById(order.shipping).name})</dt>
             <dd>{order.shippingCost ? money(order.shippingCost) : "Free"}</dd>
           </div>
+          {order.discount > 0 ? (
+            <div className="coDiscount">
+              <dt>Discount{order.promoCode ? ` (${order.promoCode})` : ""}</dt>
+              <dd>−{money(order.discount)}</dd>
+            </div>
+          ) : null}
           <div className="coGrand">
             <dt>Total</dt>
             <dd>{money(order.total)}</dd>

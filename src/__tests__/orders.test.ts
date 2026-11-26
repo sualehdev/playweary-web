@@ -16,6 +16,8 @@ const order = (over: Partial<TrackedOrder> = {}): TrackedOrder => ({
   lines: [],
   subtotal: 40,
   shippingCost: 0,
+  discount: 0,
+  promoCode: null,
   total: 40,
   arrives: ["2026-01-08T10:00:00Z", "2026-01-12T10:00:00Z"],
   isBackorder: false,
