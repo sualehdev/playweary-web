@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito_Sans } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/content/site";
+import ChristmasLayer from "@/christmas/ChristmasLayer"; // XMAS
 import CookieBanner from "@/components/CookieBanner";
 import { GtmHead, GtmNoscript } from "@/components/Gtm";
 import "./globals.css";
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <GtmHead />
         {children}
         <CookieBanner />
+        <ChristmasLayer /> {/* XMAS */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </body>
     </html>

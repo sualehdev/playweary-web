@@ -1,0 +1,663 @@
+/* Christmas layer. Delete this folder to remove all of it. */
+
+.xmas {
+  --x-red: #e0243f;
+  --x-green: #1f8a4c;
+}
+
+/* ---------- snow ---------- */
+.xSnow {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+  z-index: 54;
+  pointer-events: none;
+}
+
+/* ---------- lights ---------- */
+/* Each cell draws its own sagging wire; the glass bulb hangs from the low point. */
+.xLights {
+  position: fixed;
+  top: var(--xmas-top, 104px);
+  left: 0;
+  right: 0;
+  height: 46px;
+  z-index: 55;
+  pointer-events: none;
+  display: flex;
+  overflow: hidden;
+}
+.xLights i {
+  --c: #ff3b5c;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Cpath d='M0 1 Q50 21 100 1' fill='none' stroke='%23200242' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") 0 0 / 100% 14px no-repeat;
+}
+/* the socket */
+.xLights i::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 8px;
+  height: 7px;
+  translate: -50% 0;
+  border-radius: 2px 2px 1px 1px;
+  background: linear-gradient(90deg, #3a2a55, #7a6a98 45%, #2a1c44);
+}
+/* the glass: a bright core, a soft highlight and a halo that breathes */
+.xLights i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 13px;
+  width: 13px;
+  height: 21px;
+  translate: -50% 0;
+  border-radius: 50% 50% 50% 50% / 56% 56% 44% 44%;
+  background:
+    radial-gradient(ellipse 22% 16% at 34% 26%, rgba(255, 255, 255, 0.95), transparent 70%),
+    radial-gradient(circle at 50% 55%, #fff 0 8%, color-mix(in srgb, var(--c) 45%, #fff) 28%, var(--c) 62%, color-mix(in srgb, var(--c) 65%, #000) 100%);
+  box-shadow: 0 0 7px 2px var(--c), 0 0 14px 4px color-mix(in srgb, var(--c) 50%, transparent);
+  animation: xGlow 2.2s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  will-change: opacity;
+}
+.xLights i:nth-child(4n + 1) { --c: #ff2d55; }
+.xLights i:nth-child(4n + 2) { --c: #ffc21a; }
+.xLights i:nth-child(4n + 3) { --c: #28d878; }
+.xLights i:nth-child(4n) { --c: #3fc8ff; }
+/* opacity only: the browser can animate it without repainting the page */
+@keyframes xGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@media (max-width: 700px) {
+  .xLights i:nth-child(n + 21) { display: none; }
+}
+
+/* ---------- banner ---------- */
+.xBanner {
+  position: fixed;
+  top: calc(var(--xmas-top, 104px) + 42px);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 56;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.9rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 0 3px 0 var(--x-red);
+  font: 700 0.85rem var(--display);
+  animation: xDrop 0.5s ease-out both;
+}
+.xBanner a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.xBanner a:hover { color: var(--violet); }
+.xBannerIcon { width: 20px; height: 20px; }
+.xBanner button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.xBanner button:hover { background: rgba(32, 2, 66, 0.1); }
+@keyframes xDrop {
+  from { opacity: 0; transform: translateY(-14px); }
+}
+@media (max-width: 700px) {
+  .xBanner { display: none; }
+}
+
+/* ---------- corner scene ---------- */
+.xTreeCorner {
+  position: fixed;
+  left: 12px;
+  bottom: -8px;
+  width: clamp(112px, 9.5vw, 142px);
+  z-index: 58;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(32, 2, 66, 0.25));
+}
+.xTree { display: block; width: 100%; height: auto; }
+.xBulb { animation: xBlink 1.6s ease-in-out infinite; }
+.xBulb.b2 { animation-delay: 0.5s; }
+.xBulb.b3 { animation-delay: 1s; }
+.xStar { transform-origin: 60px 30px; animation: xPulse 2.4s ease-in-out infinite; }
+@keyframes xBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes xPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.xGiftBtn {
+  position: fixed;
+  right: 12px;
+  bottom: 0;
+  z-index: 58;
+  display: block;
+  width: 118px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 8px rgba(32, 2, 66, 0.25));
+  transition: translate 0.2s;
+}
+.xGiftBtn:hover { translate: 0 -4px; }
+.xGiftBtn:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; border-radius: 12px; }
+.xGiftSanta { display: block; width: 100%; height: auto; }
+.xGiftBox {
+  position: absolute;
+  left: -6px;
+  bottom: 2px;
+  width: 46px;
+  height: 46px;
+  animation: xHop 2.2s ease-in-out infinite;
+}
+.xWave {
+  transform-origin: 92px 86px;
+  animation: xWaving 1.4s ease-in-out infinite;
+}
+@keyframes xWaving {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-16deg); }
+}
+@keyframes xHop {
+  0%, 60%, 100% { transform: translateY(0); }
+  75% { transform: translateY(-10px); }
+}
+@media (max-height: 640px) {
+  .xTreeCorner { display: none; }
+}
+@media (max-width: 900px) {
+  .xTreeCorner { display: none; }
+  .xGiftBtn {
+    width: 58px;
+    height: 58px;
+    right: 14px;
+    bottom: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--ink);
+    box-shadow: 0 4px 0 var(--x-red);
+    filter: none;
+  }
+  .xGiftSanta { display: none; }
+  .xGiftBox { position: static; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; }
+  /* clear of the product page's sticky buy bar */
+  .xmas[data-product] .xGiftBtn { bottom: 96px; }
+}
+
+/* ---------- pop-up ---------- */
+.xPopWrap {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(32, 2, 66, 0.55);
+  animation: xFade 0.25s ease-out both;
+}
+.xPop {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  width: min(760px, 100%);
+  max-height: calc(100svh - 2rem);
+  overflow: auto;
+  border-radius: 28px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  box-shadow: 0 8px 0 var(--x-red);
+  animation: xPopIn 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  outline: none;
+}
+.xPopX {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(32, 2, 66, 0.2);
+}
+.xPopArt {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.6rem 0.6rem 0.8rem;
+  background: #2b0259; /* the same purple as the Santa GIF, so it blends */
+  position: relative;
+  overflow: hidden;
+}
+.xPopArt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, #fff 0 1.5px, transparent 2px),
+    radial-gradient(circle at 70% 30%, #fff 0 1.5px, transparent 2px),
+    radial-gradient(circle at 40% 60%, #fff 0 1.5px, transparent 2px),
+    radial-gradient(circle at 85% 70%, #fff 0 1.5px, transparent 2px);
+  opacity: 0.8;
+}
+.xPopArt .xTree { width: 40%; height: auto; position: relative; }
+.xPopArt .xSanta { width: 60%; height: auto; position: relative; }
+.xPopBody { padding: 1.8rem 1.8rem 1.4rem; display: grid; gap: 0.7rem; align-content: center; }
+.xPopBody h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.xKicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font: 800 0.8rem var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--x-red);
+}
+.xKickIcon { width: 22px; height: 22px; }
+.xPopList { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.2rem; font-size: 1rem; }
+.xPopCtas { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.4rem; }
+.xLater {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+@keyframes xFade { from { opacity: 0; } }
+@keyframes xPopIn { from { opacity: 0; transform: translateY(24px) scale(0.94); } }
+@media (max-width: 640px) {
+  .xPopWrap { align-items: end; padding: 0; }
+  .xPop {
+    grid-template-columns: 1fr;
+    max-height: 92svh;
+    border-radius: 28px 28px 0 0;
+    border-bottom: 0;
+  }
+  .xPopArt { padding-top: 1rem; max-height: 150px; }
+  .xPopArt .xTree, .xPopArt .xSanta { width: auto; height: 130px; }
+  .xPopCtas .btn { flex: 1 1 100%; }
+}
+
+/* ---------- home gift band ---------- */
+.xBand {
+  position: relative;
+  padding: clamp(3.5rem, 8vw, 6rem) 0;
+  color: #fff;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(224, 36, 63, 0.35), transparent 45%),
+    radial-gradient(circle at 90% 100%, rgba(31, 138, 76, 0.35), transparent 45%),
+    linear-gradient(180deg, #2a0a5e 0%, #200242 100%);
+  overflow: hidden;
+}
+.xBand::before,
+.xBand::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: repeating-linear-gradient(45deg, #e0243f 0 18px, #fff 18px 36px);
+}
+.xBand::before { top: 0; }
+.xBand::after { bottom: 0; }
+html[data-xmas-over] .xBand { display: none; }
+.xBandWrap {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+}
+.xBand .xKicker { color: #ffb3c0; }
+.xBandLede { margin: 0 0 1.4rem; max-width: 52ch; font-size: 1.1rem; opacity: 0.9; }
+.xCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+  width: 100%;
+  text-align: left;
+}
+.xCard {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.6rem;
+  padding: 1.3rem;
+  border-radius: 26px;
+  background: #fff;
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 0 6px 0 var(--x-red);
+}
+.xCard:nth-child(2) { box-shadow: 0 6px 0 var(--x-green); }
+.xCard:nth-child(3) { box-shadow: 0 6px 0 var(--amber, #fcc006); }
+.xCard h3 { margin: 0; }
+.xCard p { margin: 0; font-size: 0.95rem; opacity: 0.8; }
+.xTag {
+  padding: 0.2em 0.8em;
+  border-radius: 999px;
+  background: var(--amber, #fcc006);
+  font: 800 0.8rem var(--display);
+}
+/* the character sits in its own box: centred, never overlapping the text below */
+.xFigBox {
+  position: relative;
+  justify-self: stretch;
+  height: 230px;
+  margin: -0.3rem -0.3rem 0.2rem;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 70%, #efe4ff 0%, #f7f2ff 55%, #fff 100%);
+  overflow: hidden;
+}
+.xFigBox .xTag { position: absolute; top: 12px; left: 12px; z-index: 2; }
+.xFigBox .xFig {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 270px;
+  margin: 0;
+  transform: translate(-53.5%, -50%);
+}
+.xWhy ul { margin: 0.4rem 0 0.6rem; padding-left: 1.1rem; display: grid; gap: 0.5rem; font-size: 1.02rem; }
+@media (max-width: 860px) {
+  .xCards { grid-template-columns: 1fr; }
+  .xFigBox { height: 210px; }
+  .xFigBox .xFig { width: 245px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xLights i::after, .xBulb, .xStar, .xWave, .xGiftBox, .xBanner, .xPop, .xPopWrap { animation: none; }
+}
+
+/* ---------- enhanced pop-up ---------- */
+/* Fixed colours, so the text never inherits a pale colour from the page behind it. */
+.xPop { color: #200242; }
+.xPopBody h2, .xPopList li, .xLater { color: #200242; }
+.xPopBody h2 em { color: #e0243f; }
+.xBanner, .xBanner a { color: #200242; }
+
+.xPopLights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: 3;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='12'%3E%3Cpath d='M0 2 Q30 14 60 2' fill='none' stroke='%23200242' stroke-width='2'/%3E%3C/svg%3E") repeat-x 0 0 / 60px 12px;
+}
+.xPopLights i {
+  width: 9px;
+  height: 14px;
+  margin-top: 6px;
+  border-radius: 50% 50% 55% 55%;
+  background: var(--c, #ff3b5c);
+  box-shadow: 0 0 9px 2px var(--c, #ff3b5c);
+  animation: xTwinkle 1.8s ease-in-out infinite;
+}
+.xPopLights i:nth-child(4n + 1) { --c: #ff3b5c; }
+.xPopLights i:nth-child(4n + 2) { --c: #fcc006; }
+.xPopLights i:nth-child(4n + 3) { --c: #2fbf6a; }
+.xPopLights i:nth-child(4n) { --c: #4dd0ff; }
+.xPop { border-radius: 30px; }
+.xPopArt {
+  min-height: 330px;
+  padding: 2.4rem 0.4rem 1rem;
+  background:
+    radial-gradient(circle at 50% 80%, rgba(159, 62, 255, 0.55), transparent 60%),
+    linear-gradient(180deg, #1e0147 0%, #2b0259 100%);
+}
+.xGlow {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 78%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 192, 6, 0.38), transparent 65%);
+  animation: xGlowPulse 3s ease-in-out infinite;
+}
+@keyframes xGlowPulse {
+  0%, 100% { opacity: 0.6; scale: 1; }
+  50% { opacity: 1; scale: 1.08; }
+}
+.xPopArt .xTree { width: 38%; margin-right: -2%; z-index: 1; }
+.xPopArt .xSanta {
+  width: 58%;
+  z-index: 2;
+  transform-origin: 50% 100%;
+  animation: xBob 2.6s ease-in-out infinite;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.4));
+}
+@keyframes xBob {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(2.5deg) translateY(-8px); }
+}
+.xFlakes { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.xFlakes b {
+  position: absolute;
+  top: -8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.85;
+  animation: xFall linear infinite;
+}
+.xFlakes b:nth-child(3n) { width: 4px; height: 4px; }
+@keyframes xFall {
+  to { transform: translateY(380px) translateX(14px); opacity: 0.2; }
+}
+.xSash {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 3;
+  translate: -50% 0;
+  padding: 0.25em 1.1em;
+  border-radius: 999px;
+  background: #e0243f;
+  color: #fff;
+  border: 2px solid #fff;
+  font: 800 0.82rem var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 #a3123c;
+}
+.xPopBody { padding: 2.2rem 1.9rem 1.5rem; }
+.xPopBody h2 em {
+  font-style: normal;
+  color: #e0243f;
+  background: linear-gradient(transparent 62%, rgba(252, 192, 6, 0.55) 62%);
+}
+.xPopList { list-style: none; padding: 0; gap: 0.45rem; }
+.xPopList li { position: relative; padding-left: 1.7rem; }
+.xPopList li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: #2fbf6a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.500l3 3 5-6' fill='none' stroke='%23fff' stroke-width='2.200' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
+}
+.xPopList b { color: var(--violet); font-family: var(--display); font-size: 1.15em; }
+.xShine { position: relative; overflow: hidden; }
+.xShine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-20deg);
+  animation: xSweep 3.6s ease-in-out infinite;
+}
+@keyframes xSweep {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+@media (max-width: 640px) {
+  .xPopArt { min-height: 0; padding-top: 2rem; max-height: none; }
+  .xPopArt .xTree, .xPopArt .xSanta { width: auto; height: 150px; }
+  .xSash { bottom: 8px; }
+}
+
+/* ---------- Santa badge in the home gift band ---------- */
+.xSantaBadge {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin-bottom: 0.4rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #2b0259; /* the GIF's own purple */
+  border: 5px solid #fff;
+  outline: 5px dashed #e0243f;
+  outline-offset: 3px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 40px rgba(252, 192, 6, 0.35);
+}
+.xSantaBadge img, .xSantaBadge svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 640px) {
+  .xSantaBadge { width: 136px; height: 136px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xPopLights i, .xGlow, .xPopArt .xSanta, .xFlakes b, .xShine::after { animation: none; }
+}
+
+/* ---------- sticky Santa: the waving GIF in a round badge ---------- */
+.xGiftBtn {
+  right: 18px;
+  bottom: 18px;
+  width: clamp(148px, 12vw, 180px);
+  height: clamp(148px, 12vw, 180px);
+  border-radius: 50%;
+  background: #2b0259; /* the GIF's own purple */
+  border: 4px solid #fff;
+  outline: 4px dashed #e0243f;
+  outline-offset: 3px;
+  box-shadow: 0 10px 26px rgba(32, 2, 66, 0.45), 0 0 28px rgba(252, 192, 6, 0.4);
+  filter: none;
+  overflow: visible;
+}
+.xGiftBtn:focus-visible { outline: 4px solid var(--violet); }
+.xGiftSanta { border-radius: 50%; width: 100%; height: 100%; object-fit: cover; }
+.xGiftBox { left: -18px; bottom: -8px; width: 58px; height: 58px; z-index: 1; }
+.xGiftTag {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  translate: -50% 0;
+  padding: 0.1em 0.8em;
+  border-radius: 999px;
+  background: #e0243f;
+  color: #fff;
+  border: 2px solid #fff;
+  font: 800 0.78rem var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 #a3123c;
+}
+@media (max-width: 900px) {
+  .xGiftBtn {
+    width: 104px;
+    height: 104px;
+    right: 12px;
+    bottom: 22px;
+    border: 3px solid #fff;
+    outline-width: 3px;
+    background: #2b0259;
+  }
+  .xGiftSanta { display: block; }
+  .xGiftBox { position: absolute; width: 32px; height: 32px; padding: 0; left: -10px; bottom: -4px; }
+  .xmas[data-product] .xGiftBtn { bottom: 104px; }
+}
+
+/* ---------- sleigh fly-by ---------- */
+.xSleigh {
+  position: fixed;
+  top: calc(var(--xmas-top, 104px) + 70px);
+  left: 0;
+  z-index: 57;
+  pointer-events: none;
+  animation: xFly 7.5s linear forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.xSleighBob { position: relative; animation: xSway 1.6s ease-in-out infinite; will-change: transform; }
+.xSleigh svg { display: block; overflow: visible; }
+@keyframes xFly {
+  from { transform: translateX(-300px); }
+  to { transform: translateX(100vw); }
+}
+@keyframes xSway {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+.xTrail { position: absolute; left: 0; top: 0; }
+.xTrail b {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #fcc006;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: xSpark 1.1s ease-in-out infinite;
+}
+.xTrail b:nth-child(3n) { background: #fff; }
+.xTrail b:nth-child(3n + 1) { background: #ff9ec0; width: 7px; height: 7px; }
+@keyframes xSpark {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.xNose { animation: xBlink 1s ease-in-out infinite; }
+@media (max-width: 700px) {
+  .xSleigh svg { width: 150px; height: auto; }
+}
+
+.xSleighImg { display: block; width: 250px; height: auto; margin: -34px 0 -30px; }
+@media (max-width: 700px) { .xSleighImg { width: 160px; margin: -20px 0 -18px; } }

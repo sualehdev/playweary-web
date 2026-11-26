@@ -1,4 +1,5 @@
 // import Bench from "@/components/Bench";
+import ChristmasGiftBand from "@/christmas/ChristmasGiftBand"; // XMAS
 import CartDrawer from "@/components/CartDrawer";
 import Collect from "@/components/Collect";
 import FinalCta from "@/components/FinalCta";
@@ -47,6 +48,7 @@ export default async function Page() {
       <Collect />
       <Run />
       <Jigsaw />
+      <ChristmasGiftBand /> {/* XMAS */}
       <Parents />
       <Info />
       <FinalCta />

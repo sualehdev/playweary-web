@@ -16,15 +16,16 @@ export const SHIRT_SIZE: Record<CharacterId, { w: number; h: number }> = {
 };
 
 export const SHIRTS: Record<CharacterId, Shirt[]> = {
+  // Order matters: shirt n is the photo for variant n, i.e. the same set the variant tile shows.
   boy: [
+    { id: "boy-blue", alt: "Navy Playweary long-sleeve shirt with a boy character in a blue hoodie and grey shorts" },
     { id: "boy-teal", alt: "Navy Playweary long-sleeve shirt with a boy character in a teal and lime sports kit" },
-    { id: "boy-blue", alt: "Navy Playweary long-sleeve shirt with a boy character in a blue outfit" },
     { id: "boy-safari", alt: "Navy Playweary long-sleeve shirt with a boy character in a safari outfit" },
   ],
   girl: [
     { id: "girl-pink", alt: "Pink Playweary long-sleeve shirt with a girl character in a floral dress and sun hat" },
-    { id: "girl-blue", alt: "Playweary long-sleeve shirt with a girl character in a blue dress" },
-    { id: "girl-green", alt: "Playweary long-sleeve shirt with a girl character in a green dress" },
+    { id: "girl-green", alt: "Pink Playweary long-sleeve shirt with a girl character in a green top, wide jeans and a bucket hat" },
+    { id: "girl-blue", alt: "Pink Playweary long-sleeve shirt with a girl character in a blue top and denim skirt" },
   ],
 };
 

@@ -2,25 +2,24 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useRef, useSyncExternalStore } from "react";
-import { brandSize, brandSrc, pieceArt, pieceSize, pieceSrc } from "@/content/art";
-import { lookForHour, type SlotType } from "@/content/characters";
+import { brandSize, brandSrc } from "@/content/art";
+import { lookForHour } from "@/content/characters";
 import { gsap, reducedMotion, useGSAP } from "@/lib/motion";
 import Figure from "./Figure";
-import Tee from "./Tee";
 
 /**
- * The hero shirt dresses itself, one slot at a time, so you watch the pieces
- * swap rather than the whole outfit cut. It is the product demonstrating
- * itself before anyone has scrolled or clicked.
+ * The hero shows the real shirt, and its three variants take turns, fading
+ * from one to the next, so the product demonstrates itself before anyone has
+ * scrolled or clicked.
  */
-const SLOTS: SlotType[] = ["hair", "outfit", "shoes"];
-const CYCLE: Record<string, string[]> = {
-  hair: ["hair1", "hair2", "hair3"],
-  outfit: ["outfit1", "outfit2", "outfit3"],
-  shoes: ["shoes1", "shoes2", "shoes3"],
-};
-const START: Record<string, number> = { hair: 0, outfit: 1, shoes: 2 };
-const Z: Record<string, number> = { hair: 4, shoes: 3, outfit: 2 };
+const SHIRT_LOOKS = [
+  { src: "/shirts/hero-boy-blue.webp", alt: "Navy Playweary shirt with the boy in a blue hoodie" },
+  { src: "/shirts/hero-girl-pink.webp", alt: "Pink Playweary shirt with the girl in a floral dress and sun hat" },
+  { src: "/shirts/hero-boy-teal.webp", alt: "Playweary shirt with the boy in a teal sports kit" },
+  { src: "/shirts/hero-girl-green.webp", alt: "Playweary shirt with the girl in a green top and denim trousers" },
+  { src: "/shirts/hero-boy-safari.webp", alt: "Playweary shirt with the boy in a safari outfit" },
+  { src: "/shirts/hero-girl-blue.webp", alt: "Playweary shirt with the girl in a blue top and denim skirt" },
+];
 
 /**
  * The visitor's own time of day, as "9:38 PM|one last adventure before bed".
@@ -89,7 +88,6 @@ export default function Hero() {
           },
         })
         .from(q(".teeWrap"), { y: 70, scale: 0.9, opacity: 0, duration: 0.8 })
-        .from(q("#heroTee .worn"), { scale: 0, opacity: 0, stagger: 0.09, duration: 0.5 }, "-=.35")
         .from(q("#heroLogo"), { scale: 0.72, opacity: 0, duration: 0.6 }, 0.15)
         .from(q(".heroline"), { y: 20, opacity: 0, duration: 0.45, ease: "power2.out" }, "-=.25")
         .from(q(".maths"), { y: 18, opacity: 0, duration: 0.4, ease: "power2.out" }, "-=.25")
@@ -108,33 +106,15 @@ export default function Hero() {
         if (one > 0) loop(gsap.to(tp, { attr: { startOffset: -one }, duration: one / 38, repeat: -1, ease: "none" }));
       }
 
-      // swap one slot every couple of seconds, but only while the hero is on screen
-      const at = { ...START };
-      let turn = 0;
+      // fade to the next variant every few seconds, but only while the hero is on screen
+      const looks = Array.from(el.querySelectorAll<HTMLElement>("#heroTee .heroShirtImg"));
+      let at = 0;
       const swap = () => {
-        const t = SLOTS[turn++ % 3];
-        at[t] = (at[t] + 1) % 3;
-        const piece = el.querySelector<HTMLElement>(`#heroTee .worn[data-slot="${t}"]`);
-        const img = piece?.querySelector("img");
-        if (!piece || !img) return;
-        const next = CYCLE[t][at[t]];
-        gsap
-          .timeline()
-          .to(piece, { scale: 0.5, opacity: 0, rotate: -14, duration: 0.22, ease: "power2.in" })
-          .add(() => {
-            // each piece has its own spot on him: move the holder, not just the picture
-            const pos = piece.parentElement;
-            const { slot } = pieceArt("boy", next);
-            if (pos) Object.assign(pos.style, { left: slot.cx + "%", top: slot.cy + "%", width: slot.w + "%" });
-            img.src = pieceSrc("boy", next, 256);
-            img.width = pieceSize("boy", next, 256).width;
-            img.height = pieceSize("boy", next, 256).height;
-          })
-          .fromTo(
-            piece,
-            { scale: 1.45, opacity: 0, rotate: 12 },
-            { scale: 1, opacity: 1, rotate: 0, duration: 0.52, ease: "back.out(2.4)" }
-          );
+        const from = looks[at];
+        at = (at + 1) % looks.length;
+        const to = looks[at];
+        gsap.to(from, { opacity: 0, scale: 0.96, duration: 0.55, ease: "power2.inOut" });
+        gsap.fromTo(to, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power2.inOut" });
       };
       let timer: ReturnType<typeof setInterval> | undefined;
       const io = new IntersectionObserver(
@@ -142,7 +122,7 @@ export default function Hero() {
           inView = e.isIntersecting;
           loops.forEach((t) => t.paused(!inView));
           clearInterval(timer);
-          if (inView) timer = setInterval(swap, 1900);
+          if (inView) timer = setInterval(swap, 3200);
         },
         { threshold: 0.25 }
       );
@@ -238,25 +218,21 @@ export default function Hero() {
             </svg>
             <Figure character="boy" set={2} className="heroKid boy" />
             <Figure character="girl" set={1} className="heroKid girl" />
-          <Tee id="heroTee" character="boy">
-            <div className="pieceLayer">
-              {SLOTS.map((t) => {
-                const id = CYCLE[t][START[t]];
-                const art = pieceArt("boy", id);
-                return (
-                  <div
-                    key={t}
-                    className="wornPos"
-                    style={{ left: art.slot.cx + "%", top: art.slot.cy + "%", width: art.slot.w + "%", zIndex: Z[t] }}
-                  >
-                    <div className="worn" data-slot={t}>
-                      <img src={pieceSrc("boy", id, 256)} {...pieceSize("boy", id, 256)} alt="" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Tee>
+          <div className="teeWrap heroShirt" id="heroTee">
+            {SHIRT_LOOKS.map((l, i) => (
+              <img
+                key={l.src}
+                className="heroShirtImg"
+                src={l.src}
+                width={853}
+                height={760}
+                alt={i === 0 ? l.alt : ""}
+                aria-hidden={i === 0 ? undefined : true}
+                style={{ opacity: i === 0 ? 1 : 0 }}
+                fetchPriority={i === 0 ? "high" : "low"}
+              />
+            ))}
+          </div>
           </div>
         </div>
       </div>

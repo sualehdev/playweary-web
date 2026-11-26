@@ -28,7 +28,7 @@ body {
   font-family: var(--body);
   color: var(--ink);
   background: var(--cream);
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 #sky {
@@ -499,6 +499,20 @@ header.bar {
 #heroTee .worn {
   cursor: default;
   pointer-events: none;
+}
+/* The hero shirt: real photos of the three variants, stacked and faded in turn. */
+.heroShirt {
+  display: grid;
+  place-items: center;
+}
+.heroShirtImg {
+  grid-area: 1 / 1;
+  width: 118%;
+  max-width: none;
+  height: auto;
+  filter: drop-shadow(0 18px 24px rgba(32, 2, 66, 0.3));
+  pointer-events: none;
+  will-change: opacity, transform;
 }
 
 #heroCue {
