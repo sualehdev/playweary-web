@@ -3,10 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * The checkout: contact, US shipping address, shipping speed and payment
- * (cash on delivery, or PayPal/Venmo/card when the API has PayPal on), with the
- * order summary beside it. Placing the order goes through `placeOrder` in
- * lib/checkout, which sends it to the API; the server's prices and totals are
- * what the confirmation shows.
+ * (PayPal, Venmo or card; cash on delivery is switched off), with the order
+ * summary beside it. The PayPal buttons send the order to the API, which prices
+ * it; the server's prices and totals are what the confirmation shows.
  */
 
 import Link from "next/link";
@@ -21,7 +20,6 @@ import {
   lookupZip,
   orderSubtotal,
   newIdempotencyKey,
-  placeOrder,
   getPaymentsConfig,
   type PaymentsConfig,
   type Order,
@@ -263,21 +261,23 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const shipping: ShippingMethod["id"] = "standard";
-  const [payment, setPayment] = useState<PaymentMethod>("cod");
+  // PayPal (with Venmo and card) is the only payment method; cash on delivery is switched off.
+  const payment: PaymentMethod = "paypal";
   const [payCfg, setPayCfg] = useState<PaymentsConfig["paypal"]>({ enabled: false });
+  const [payLoaded, setPayLoaded] = useState(false);
   useEffect(() => {
-    void getPaymentsConfig().then((c) => setPayCfg(c.paypal));
+    void getPaymentsConfig()
+      .then((c) => setPayCfg(c.paypal))
+      .finally(() => setPayLoaded(true));
   }, []);
   const paypalOn = payCfg.enabled && payment === "paypal";
-  const [busy, setBusy] = useState(false);
+  const busy = false; // the PayPal buttons show their own progress
   const router = useRouter();
   const [placed, setPlaced] = useState(false);
   const [serverError, setServerError] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const top = useRef<HTMLDivElement>(null);
   const alertRef = useRef<HTMLParagraphElement>(null);
-  // One key per attempt: retrying after a network error can't create a second order.
-  const attemptKey = useRef<string | null>(null);
 
   // Standard is the only method; its price is an admin setting passed in from the page.
   const ship: ShippingMethod = { ...shippingById(shipping), price: shippingCents / 100 };
@@ -422,25 +422,9 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
     showError(message, err);
   };
 
-  const submit = async (e: React.FormEvent) => {
+  // Enter in a field submits the form; payment only happens through the PayPal buttons.
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy || paypalOn) return;
-    const order = buildOrder("cod");
-    if (!order) return;
-    setBusy(true);
-    setServerError("");
-    attemptKey.current ??= newIdempotencyKey();
-    try {
-      const placedOrder = await placeOrder(order, attemptKey.current, honeypot);
-      attemptKey.current = null;
-      finish(placedOrder);
-    } catch (err) {
-      // A rejected order (4xx) was not stored, so the next attempt gets a fresh key.
-      if (err instanceof ApiError && err.status >= 400 && err.status < 500) attemptKey.current = null;
-      showError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.", err);
-    } finally {
-      setBusy(false);
-    }
   };
 
   return (
@@ -541,28 +525,15 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                 <fieldset className="card">
                   <legend className="coH">Payment</legend>
                   <div className="coChoices">
-                    <label className={"coChoice" + (payment === "cod" ? " on" : "")}>
-                      <input type="radio" name="payment" value="cod" checked={payment === "cod"} onChange={() => { setPayment("cod"); setServerError(""); }} />
+                    <div className="coChoice on">
                       <span className="coChoiceText">
-                        <b>Cash on delivery</b>
-                        <span>Pay the courier in cash when your kit arrives.</span>
+                        <b>PayPal, Venmo or card</b>
+                        <span>Pay securely with PayPal. No PayPal account needed for cards.</span>
                       </span>
-                      <span className="coPayIcon" aria-hidden="true">
-                        💵
+                      <span className="coPayPal" aria-hidden="true">
+                        <i>Pay</i>Pal
                       </span>
-                    </label>
-                    {payCfg.enabled ? (
-                      <label className={"coChoice" + (payment === "paypal" ? " on" : "")}>
-                        <input type="radio" name="payment" value="paypal" checked={payment === "paypal"} onChange={() => { setPayment("paypal"); setServerError(""); }} />
-                        <span className="coChoiceText">
-                          <b>PayPal, Venmo or card</b>
-                          <span>Pay now securely with PayPal. No PayPal account needed for cards.</span>
-                        </span>
-                        <span className="coPayPal" aria-hidden="true">
-                          <i>Pay</i>Pal
-                        </span>
-                      </label>
-                    ) : null}
+                    </div>
                   </div>
                   {payCfg.enabled && payCfg.env === "sandbox" ? (
                     <p className="coSmall">Test mode: PayPal sandbox. No real money moves.</p>
@@ -604,12 +575,14 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                     onError={paypalError}
                   />
                 ) : (
-                  <button className="btn wide coPlace" type="submit" disabled={busy} aria-busy={busy}>
-                    {busy ? "Placing your order…" : `Place order · ${money(total)}`}
-                  </button>
+                  <p className="coAlert" role="status">
+                    {payLoaded
+                      ? "Online payment is unavailable right now. Please try again in a few minutes or email hello@playweary.com."
+                      : "Loading secure payment…"}
+                  </p>
                 )}
                 <p className="coSmall center">
-                  {paypalOn ? `You'll pay ${money(total)} in PayPal's secure window.` : "You pay the courier in cash when your kit arrives."} By placing your order you agree to our{" "}
+                  You&apos;ll pay {money(total)} in PayPal&apos;s secure window. By placing your order you agree to our{" "}
                   <Link href="/returns-refunds">Returns &amp; Refunds Policy</Link>, <Link href="/terms-of-service">Terms of Service</Link> and <Link href="/privacy-policy">Privacy Policy</Link>. Questions? hello@playweary.com
                 </p>
               </form>

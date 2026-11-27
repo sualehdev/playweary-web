@@ -136,7 +136,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
   {
     slug: "payment-policy",
     kind: "legal",
-    summary: ["Cash on delivery is the payment method for now.", "You pay the courier when your parcel arrives.", "No extra charges at the door."],
+    summary: ["Pay online with PayPal, Venmo or a debit or credit card.", "You are charged when you place your order.", "No extra charges at the door."],
     related: ["shipping-policy", "returns-refunds", "terms-of-service"],
     title: "Payment Policy",
     link: "Payment Policy",
@@ -145,8 +145,9 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
       {
         h: "Accepted payment",
         p: [
-          "Right now you pay by cash on delivery: place your order, then hand the courier the total in cash when your kit arrives. Please have the exact amount ready. You are not charged anything online.",
-          "PayPal and card payment will be added when the store opens to online payment. This page will be updated first.",
+          "You pay online at checkout through PayPal: with your PayPal balance, Venmo, or a debit or credit card. You do not need a PayPal account to pay by card.",
+          "Your payment is taken when you place your order, and your order is confirmed once PayPal approves it. We never see or store your card details.",
+          "We do not accept cash on delivery.",
         ],
       },
       {
@@ -159,7 +160,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
       },
       {
         h: "Refunds",
-        p: ["Because cash orders are paid on delivery, an eligible refund is sent back to you by a method we agree with you (for example PayPal or bank transfer) within 3 to 5 business days of us receiving the return. See the Returns & Refunds Policy."],
+        p: ["An eligible refund goes back to the payment method you used (your PayPal account, Venmo or card) within 3 to 5 business days of us receiving the return. Your bank may take a few more days to show it. See the Returns & Refunds Policy."],
       },
       {
         h: "Problems with an order",
@@ -234,7 +235,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
       { h: "Return shipping", p: ["Returns are free. We email a prepaid label for an unworn or unopened return, a size swap, or a damaged or faulty item."] },
       {
         h: "Refunds",
-        p: ["Once the parcel reaches us we check it and process the refund within 3 to 5 business days. The refund goes to your original payment method. For cash-on-delivery orders we agree a method with you (see the Payment Policy). Original shipping is refunded if the return is for a damaged or faulty item."],
+        p: ["Once the parcel reaches us we check it and process the refund within 3 to 5 business days. The refund goes to your original payment method (PayPal, Venmo or card). Original shipping is refunded if the return is for a damaged or faulty item."],
       },
     ],
   },
@@ -278,7 +279,7 @@ export const policiesFor = (shipCents: number): PolicyPage[] => [
       { h: "What comes in a kit?", p: ["One printed character shirt plus three sets of velcro pieces (hair, outfit and shoes)."] },
       { h: "What size should I pick?", p: ["Go by your child's height, using the size table on each product page. Between sizes, go up."] },
       { h: "How much is delivery?", p: [`Standard shipping is ${shipPrice(shipCents).toLowerCase()} and takes ${standard.days[0]} to ${standard.days[1]} business days.`] },
-      { h: "How do I pay?", p: ["By cash on delivery for now. See the Payment Policy."] },
+      { h: "How do I pay?", p: ["Online at checkout with PayPal, Venmo or a debit or credit card. See the Payment Policy."] },
       { h: "Can I return it?", p: ["Yes: 30 days from delivery for unworn shirts and unopened sets. See Returns & Refunds."] },
       { h: "Can it go in the wash?", p: ["Yes. Machine wash cold, inside out. Tumble dry low or hang to dry, and do not bleach."] },
       { h: "What age is it for?", p: ["Ages 3 and up. It has small parts, so keep loose pieces away from babies and younger siblings."] },

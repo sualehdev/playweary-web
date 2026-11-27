@@ -18,12 +18,22 @@
 }
 .shirtPrice {
   font-family: var(--display);
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin: 0 0 0.4rem;
 }
-.shirtPrice s {
-  opacity: 0.5;
-  font-size: 1.05rem;
+/* The struck-through "was" price: big, red and clearly crossed out, so the saving reads at a glance. */
+.shirtPrice s,
+.finalKitPrice s,
+.pdMorePrice s {
+  display: inline-block;
+  margin-right: 0.25em;
+  font-size: 0.8em;
+  font-weight: 800;
+  color: #d61f3c;
+  opacity: 1;
+  text-decoration-line: line-through;
+  text-decoration-thickness: 0.12em;
+  text-decoration-color: #d61f3c;
 }
 .variantHead {
   display: flex;

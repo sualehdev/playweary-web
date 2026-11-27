@@ -108,7 +108,10 @@ export default function ChristmasLayer() {
         <div className="xBanner" role="region" aria-label="Christmas gifts">
           {OFFER.on ? (
             <p className="xBannerText">
-              <Present className="xBannerIcon" hue="red" /> Special Christmas offer: <b>{OFFER.text}</b> every kit, no code needed
+              <Present className="xBannerIcon" hue="red" />
+              <span>
+                Special Christmas offer: <b>{OFFER.text}</b> every kit, no code needed
+              </span>
             </p>
           ) : (
             <Link href={KITS.girl.href} onClick={() => track("xmas_banner_click")}>

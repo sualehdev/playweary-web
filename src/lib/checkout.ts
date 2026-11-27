@@ -1,9 +1,9 @@
 /**
  * The seams between the checkout page and the outside world.
  *
- * `placeOrder` sends the order to the Playweary API, which re-prices it,
- * reserves stock and emails the customer. PayPal is switched off until
- * launch, so cash on delivery is the only live method.
+ * Orders are paid with PayPal (Venmo and card included): the API re-prices the
+ * order, reserves stock, creates the PayPal order and emails the customer once
+ * paid. Cash on delivery is switched off (`placeOrder` is kept for old flows).
  */
 
 import { productById } from "@/content/products";
@@ -139,7 +139,7 @@ export async function getPaymentsConfig(): Promise<PaymentsConfig> {
   try {
     return await api<PaymentsConfig>("/v1/payments/config", { timeoutMs: 6_000 });
   } catch {
-    return { paypal: { enabled: false } }; // checkout still works with cash on delivery
+    return { paypal: { enabled: false } }; // checkout then shows that payment is unavailable
   }
 }
 

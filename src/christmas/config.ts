@@ -16,12 +16,14 @@ export const KITS = {
 } as const;
 
 /**
- * The Christmas offer: no code. The saving is shown as the struck-through "was" price on every
- * kit (see COMPARE_AT_MARKUP in lib/catalog.ts), so the pop-up, banner and button only name it.
- * Change the wording with NEXT_PUBLIC_XMAS_OFFER="25% off"; set it to "off" for a gift-only layer.
+ * The Christmas offer: 25% off, no code. The saving is shown as the struck-through "was" price
+ * on every kit (see COMPARE_AT_MARKUP in lib/catalog.ts), so the pop-up, banner and button only
+ * name it. The wording is fixed here on purpose, so an old env value can't show another number.
+ * NEXT_PUBLIC_XMAS_OFFER=off hides the offer (gift-only layer); any other value is ignored.
  */
-const text = (process.env.NEXT_PUBLIC_XMAS_OFFER ?? "25% off").trim();
-export const OFFER = { text, on: text !== "" && text.toLowerCase() !== "off" } as const;
+const OFFER_TEXT = "25% off";
+const offerOff = (process.env.NEXT_PUBLIC_XMAS_OFFER ?? "").trim().toLowerCase() === "off";
+export const OFFER = { text: OFFER_TEXT, on: !offerOff } as const;
 
 /** localStorage keys */
 export const POPUP_KEY = "pw:xmas-popup";
