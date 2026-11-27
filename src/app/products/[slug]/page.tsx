@@ -32,17 +32,35 @@ export function generateStaticParams() {
   return PRODUCT_PAGES.map((p) => ({ slug: p.slug }));
 }
 
+/** Search titles and descriptions per kit, as supplied for SEO. */
+const PRODUCT_META: Record<string, { title: string; description: string }> = {
+  boy: {
+    title: "Magic Makeover Tee for Boys | 27 Looks | Playweary",
+    description:
+      "The Magic Makeover Tee for boys: Velcro hair & outfits for 27 complete looks. No sewing, machine washable, and built to last. Shop the boy's tee now.",
+  },
+  girl: {
+    title: "Magic Makeover Tee for Girls | 81 Looks | Playweary",
+    description:
+      "The Magic Makeover Tee for girls: Velcro hair & outfits for 81 complete looks. No sewing, machine washable, and built to last. Shop the girl's tee now.",
+  },
+};
+
 export async function generateMetadata({ params }: PageProps<"/products/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const page = productPageBySlug(slug);
   if (!page) return {};
   const kit = productById(`kit-${page.character}`)!;
   const image = shirtSrc(productImages(page.character)[0], 1100);
+  const meta = PRODUCT_META[page.character];
+  const title = meta?.title ?? `${kit.name} · Playweary`;
+  const description = meta?.description ?? describe(page.character);
   return {
-    title: kit.name,
-    description: describe(page.character),
+    title: { absolute: title },
+    description,
     alternates: { canonical: `/products/${page.slug}` },
-    openGraph: { type: "website", title: kit.name, description: describe(page.character), url: `/products/${page.slug}`, images: [image] },
+    openGraph: { type: "website", title, description, url: `/products/${page.slug}`, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 
@@ -234,7 +252,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             <span className="pdMoreBody">
               <span className="eyebrow">Shopping for a sibling?</span>
               <h2 id="pd-more">{otherKit.name}</h2>
-              <span className="pdMorePrice">{money(otherKit.price)}</span>
+              <span className="pdMorePrice">{otherKit.was ? <s>{money(otherKit.was)}</s> : null} {money(otherKit.price)}</span>
               <span className="pdMoreText">{otherKit.sub}. {otherKit.looks}.</span>
               <span className="pdMoreThumbs" aria-hidden="true">
                 {productImages(other.character).map((id) => (

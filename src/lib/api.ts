@@ -11,7 +11,9 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly details: string[] = []
+    readonly details: string[] = [],
+    /** Machine-readable reason from the API, e.g. "INSTRUMENT_DECLINED". */
+    readonly code?: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -44,19 +46,21 @@ export async function api<T>(path: string, { body, timeoutMs = 10_000, headers, 
 
   let message = FRIENDLY[res.status] ?? "Something went wrong on our side. Please try again.";
   let details: string[] = [];
+  let code: string | undefined;
   try {
-    const err = (await res.json()) as { message?: string | string[] };
+    const err = (await res.json()) as { message?: string | string[]; code?: string };
+    code = typeof err.code === "string" ? err.code : undefined;
     const raw = Array.isArray(err.message) ? err.message : err.message ? [err.message] : [];
     // Nest prefixes nested field messages with their path ("address.Enter a city.").
     details = raw.map((m) => m.replace(/^[\w.[\]]+\.(?=[A-Z])/, ""));
     // Show the server's own wording for validation, sold-out and per-email limits, but not
     // the framework's generic throttle text ("ThrottlerException: Too Many Requests").
     const own = details[0] && !/^ThrottlerException/i.test(details[0]) ? details[0] : undefined;
-    if (res.status === 400 || res.status === 409 || res.status === 429) message = own ?? message;
+    if (res.status === 400 || res.status === 409 || res.status === 429 || res.status === 503 || code) message = own ?? message;
   } catch {
     /* not JSON */
   }
-  throw new ApiError(message, res.status, details);
+  throw new ApiError(message, res.status, details, code);
 }
 
 export const cents = (c: number) => c / 100;

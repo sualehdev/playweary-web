@@ -88,5 +88,16 @@ export const cartCount = (cart: CartLine[]) => cart.reduce((n, l) => n + l.q, 0)
 export const cartTotal = (cart: CartLine[], lookup: (id: string) => { price: number } | undefined = productById) =>
   cart.reduce((sum, l) => sum + (lookup(l.id)?.price ?? 0) * l.q, 0);
 
+/**
+ * The checkout address with the basket's value and kit ids in it (/checkout?value=…&items=…),
+ * like /thank-you, for tag rules that match on the URL. `value` is the items subtotal,
+ * before shipping and any promo code.
+ */
+export const checkoutHref = (cart: CartLine[], lookup: (id: string) => { price: number } | undefined = productById) => {
+  if (!cart.length) return "/checkout";
+  const ids = [...new Set(cart.map((l) => l.id))].join(",");
+  return `/checkout?value=${cartTotal(cart, lookup).toFixed(2)}&items=${encodeURIComponent(ids)}`;
+};
+
 /** Set ids you can dress with: every kit includes all of its sets. */
 export const ownedSets = (): Set<string> => new Set(ALL_SETS.map((s) => s.id));

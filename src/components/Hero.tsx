@@ -51,23 +51,7 @@ export default function Hero() {
       const q = gsap.utils.selector(el);
       const heroTee = el.querySelector<HTMLElement>("#heroTee");
 
-      // the headline number counts up (the server ships "27", so it never flashes down)
-      const countEl = el.querySelector<HTMLElement>("#lookCount");
       if (reducedMotion()) return;
-
-      if (countEl) {
-        const n = { v: 0 };
-        countEl.textContent = "0";
-        gsap.to(n, {
-          v: 27,
-          duration: 1.5,
-          delay: 0.65,
-          ease: "power2.out",
-          onUpdate: () => {
-            countEl.textContent = String(Math.round(n.v));
-          },
-        });
-      }
 
       // every endless loop here, so they can all stop when the hero is off screen
       const loops: ReturnType<typeof gsap.to>[] = [];
@@ -154,7 +138,6 @@ export default function Hero() {
         clearInterval(timer);
         io.disconnect();
         off?.();
-        if (countEl) countEl.textContent = "27";
       };
     },
     { scope: root }
@@ -171,7 +154,7 @@ export default function Hero() {
             alt="Playweary: wear, swap, play"
           />
           <h1 className="heroline">
-            One shirt. <em id="lookCount">27</em> different kids.
+            One shirt. <em>Endless</em> different looks.
           </h1>
           <div className="maths">
             🕓{" "}
@@ -187,8 +170,8 @@ export default function Hero() {
           </div>
           <p className="lede">
             One printed character on the shirt. Velcro hair, outfits and shoes that rip off and
-            stick back on. Every kit comes with all three sets: <b>27 complete looks</b>, and it all
-            goes in the same wash.
+            stick back on. Every kit comes with multiple sets for <b>endless complete looks</b>, and it
+            all goes in the same wash.
           </p>
           <div className="herocta">
             <button className="btn" data-scroll="#bench" type="button">

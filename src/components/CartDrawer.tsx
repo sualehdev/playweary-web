@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { money } from "@/content/products";
-import { cartCount, cartTotal } from "@/store/shop";
+import { cartCount, cartTotal, checkoutHref } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 
@@ -112,7 +112,7 @@ export default function CartDrawer() {
           <p style={{ fontSize: ".85rem", opacity: 0.8 }}>
             30-day returns on unworn items · sized by height.
           </p>
-          <Link className="btn wide" href="/checkout" onClick={closeDrawer}>
+          <Link className="btn wide" href={checkoutHref(cart, productById)} onClick={closeDrawer}>
             Checkout · {money(cartTotal(cart, productById))}
           </Link>
           <p style={{ fontSize: ".85rem", textAlign: "center", marginTop: ".6rem" }}>

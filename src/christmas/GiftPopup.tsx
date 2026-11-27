@@ -1,30 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { track } from "@/lib/track";
 import { Present, Santa, Tree } from "./art";
 import Pic from "./Pic";
-import { KITS, OFFER, PROMO_PREFILL_KEY } from "./config";
+import { KITS, OFFER } from "./config";
 
 /** The gift pop-up. A proper dialog: focus moves in, Tab stays inside, Esc and the backdrop close it. */
 export default function GiftPopup({ onClose }: { onClose: () => void }) {
   const box = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
-  // The checkout pre-fills its promo box with this, so the offer is one tap from the cart.
-  const keepCode = () => {
-    if (!OFFER.on) return;
-    try {
-      sessionStorage.setItem(PROMO_PREFILL_KEY, OFFER.code);
-    } catch {
-      /* storage unavailable: they can still type the code */
-    }
-  };
-  const copy = () => {
-    keepCode();
-    void navigator.clipboard?.writeText(OFFER.code).then(() => setCopied(true), () => undefined);
-  };
-
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
     box.current?.focus();
@@ -103,25 +88,22 @@ export default function GiftPopup({ onClose }: { onClose: () => void }) {
           {OFFER.on ? (
             <div className="xCode">
               <span>
-                Use code <b>{OFFER.code}</b> at checkout
+                Special <b>{OFFER.text}</b> on every kit. No code needed.
               </span>
-              <button type="button" onClick={copy}>
-                {copied ? "Copied" : "Copy"}
-              </button>
             </div>
           ) : null}
           <ul className="xPopList">
             <li>
-              <b>27</b> different looks from one shirt
+              <b>Endless</b> different looks from one shirt
             </li>
             <li>Velcro hair, outfits and shoes to swap</li>
             <li>No batteries, no screens, and it all goes in the same wash</li>
           </ul>
           <div className="xPopCtas">
-            <Link className="btn xShine" href={KITS.girl.href} onClick={() => { keepCode(); track("xmas_popup_click", { kit: "girl" }); onClose(); }}>
+            <Link className="btn xShine" href={KITS.girl.href} onClick={() => { track("xmas_popup_click", { kit: "girl" }); onClose(); }}>
               {KITS.girl.label}
             </Link>
-            <Link className="btn pink xShine" href={KITS.boy.href} onClick={() => { keepCode(); track("xmas_popup_click", { kit: "boy" }); onClose(); }}>
+            <Link className="btn pink xShine" href={KITS.boy.href} onClick={() => { track("xmas_popup_click", { kit: "boy" }); onClose(); }}>
               {KITS.boy.label}
             </Link>
           </div>

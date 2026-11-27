@@ -30,14 +30,14 @@ export default async function KitCtas() {
             const first = SHIRTS[c][0];
             const { w, h } = SHIRT_SIZE[c];
             return (
-              <Link key={c} href={productPath(c)} className="card kitCta" aria-label={`${COPY[c].title}, ${money(kit.price)}`}>
+              <Link key={c} href={productPath(c)} className="card kitCta" aria-label={`${COPY[c].title}, ${kit.was ? `was ${money(kit.was)}, now ` : ""}${money(kit.price)}`}>
                 <span className="kitCtaImg" style={{ background: c === "boy" ? "#f4ede3" : "#ebe9ee" }}>
                   <img src={shirtSrc(first.id, 640)} width={w} height={h} alt={first.alt} loading="lazy" />
                 </span>
                 <span className="kitCtaBody">
                   <h3>{COPY[c].title}</h3>
                   <p>{kit.sub}. 3 variants in every kit.</p>
-                  <b className="shirtPrice">{money(kit.price)}</b>
+                  <b className="shirtPrice">{kit.was ? <s>{money(kit.was)}</s> : null} {money(kit.price)}</b>
                   <span className="btn">{COPY[c].cta}</span>
                 </span>
               </Link>
