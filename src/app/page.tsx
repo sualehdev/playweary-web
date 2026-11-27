@@ -21,6 +21,19 @@ import { getCatalog } from "@/lib/catalog.server";
 import { ShopProvider } from "@/store/ShopProvider";
 import "@/styles/playweary.css";
 import "@/styles/home.css";
+import type { Metadata } from "next";
+
+const HOME_TITLE = "Magic Makeover Tees for Kids | Playweary";
+const HOME_DESCRIPTION =
+  "Discover the Magic Makeover Tee by Playweary. One shirt with Velcro hair and outfits for endless complete looks. No sewing, machine washable, and built to last. Shop now.";
+
+export const metadata: Metadata = {
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", title: HOME_TITLE, description: HOME_DESCRIPTION, url: "/" },
+  twitter: { card: "summary_large_image", title: HOME_TITLE, description: HOME_DESCRIPTION },
+};
 
 export default async function Page() {
   const catalog = await getCatalog();

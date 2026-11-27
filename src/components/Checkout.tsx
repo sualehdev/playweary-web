@@ -36,7 +36,7 @@ import {
   type ShippingMethod,
 } from "@/lib/checkout";
 import { isEmail } from "@/lib/newsletter";
-import { cartCount, type CartLine } from "@/store/shop";
+import { cartCount, checkoutHref, type CartLine } from "@/store/shop";
 import { useShop } from "@/store/ShopProvider";
 import KitThumb from "./KitThumb";
 import OrderLoader from "./OrderLoader";
@@ -174,6 +174,9 @@ function Summary({
     </div>
   );
 }
+
+/** The "Have a promo code?" box. Off for now (the Christmas saving is in the price); true brings it back. */
+const SHOW_PROMO_BOX = false;
 
 /** A promo code another part of the site left for the checkout (empty on the server and when none). */
 function carriedCode(): string {
@@ -323,6 +326,15 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
   useEffect(() => {
     if (placed) top.current?.scrollIntoView({ block: "start" });
   }, [placed]);
+
+  // Keep ?value=…&items=… in the address in step with the basket (also for a direct visit or a
+  // quantity change here). replaceState: no new history entry and no reload.
+  useEffect(() => {
+    if (!state.hydrated || placed || cartCount(state.cart) === 0) return;
+    const href = checkoutHref(state.cart, productById);
+    if (window.location.pathname + window.location.search !== href) window.history.replaceState(null, "", href);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.hydrated, placed, cartKey]);
 
   // The state box is a type-to-search field; `fields.state` holds the two-letter code once it matches.
   const [stateText, setStateText] = useState("");
@@ -609,7 +621,7 @@ export default function Checkout({ shippingCents }: { shippingCents: number }) {
                   lines={state.cart}
                   discount={promo?.discount}
                   promoCode={promo?.code}
-                  promoBox={<PromoBox promo={promo} email={fields.email} busy={promoBusy} message={promoMsg} onApply={(c) => void applyPromo(c)} onRemove={() => { setPromo(null); setPromoMsg(""); }} />}
+                  promoBox={SHOW_PROMO_BOX ? <PromoBox promo={promo} email={fields.email} busy={promoBusy} message={promoMsg} onApply={(c) => void applyPromo(c)} onRemove={() => { setPromo(null); setPromoMsg(""); }} /> : null}
                 />
               </aside>
             </div>

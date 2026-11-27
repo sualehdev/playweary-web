@@ -27,16 +27,25 @@ export function toCatalog(rows: LiveProduct[]): Catalog {
   return Object.fromEntries(rows.map((r) => [r.sku, r]));
 }
 
+/**
+ * The struck-through "was" price when the admin has not set a compare-at price: the real
+ * price plus 25% ($40 → $50). A compare-at price set in the admin's Products page wins.
+ * Set to 0 to show no "was" price unless the admin sets one.
+ */
+export const COMPARE_AT_MARKUP = 0.25;
+
+const markedUp = (price: number) => (COMPARE_AT_MARKUP > 0 ? Math.round(price * (1 + COMPARE_AT_MARKUP) * 100) / 100 : undefined);
+
 /** Static products with live price/availability applied where the API knows them. */
 export function applyCatalog(products: Product[], catalog: Catalog | null | undefined): Product[] {
-  if (!catalog) return products;
   return products.map((p) => {
-    const live = catalog[p.id];
-    if (!live) return p;
+    const live = catalog?.[p.id];
+    if (!live) return { ...p, was: p.was ?? markedUp(p.price) };
+    const price = cents(live.priceCents);
     return {
       ...p,
-      price: cents(live.priceCents),
-      was: live.compareAtCents && live.compareAtCents > live.priceCents ? cents(live.compareAtCents) : undefined,
+      price,
+      was: live.compareAtCents && live.compareAtCents > live.priceCents ? cents(live.compareAtCents) : markedUp(price),
       available: live.purchasable,
       backorder: live.backorder,
       backorderNote: live.backorderNote,

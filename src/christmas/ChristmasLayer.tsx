@@ -106,21 +106,18 @@ export default function ChristmasLayer() {
       {path === "/" ? <Sleigh /> : null}
       {banner ? (
         <div className="xBanner" role="region" aria-label="Christmas gifts">
-          <Link
-            href={KITS.girl.href}
-            onClick={() => track("xmas_banner_click")}
-          >
-            <Present className="xBannerIcon" hue="red" />{" "}
-            {OFFER.on ? (
-              <>
-                Special Christmas offer: {OFFER.text} with code <b>{OFFER.code}</b>
-              </>
-            ) : (
-              "Gift a Playweary kit this Christmas"
-            )}
-          </Link>
+          {OFFER.on ? (
+            <p className="xBannerText">
+              <Present className="xBannerIcon" hue="red" /> Special Christmas offer: <b>{OFFER.text}</b> every kit, no code needed
+            </p>
+          ) : (
+            <Link href={KITS.girl.href} onClick={() => track("xmas_banner_click")}>
+              <Present className="xBannerIcon" hue="red" /> Gift a Playweary kit this Christmas
+            </Link>
+          )}
           <button
             type="button"
+            className="xBannerClose"
             aria-label="Hide the Christmas banner"
             onClick={() => {
               remember(BANNER_KEY);
@@ -137,7 +134,7 @@ export default function ChristmasLayer() {
       <button
         type="button"
         className="xGiftBtn"
-        aria-label={OFFER.on ? `Special Christmas offer: ${OFFER.text} with code ${OFFER.code}` : "Christmas gift ideas"}
+        aria-label={OFFER.on ? `Special Christmas offer: ${OFFER.text}` : "Christmas gift ideas"}
         onClick={() => {
           track("xmas_button_click");
           setPopup(true);

@@ -30,13 +30,13 @@ export default async function FinalCta() {
               const kit = products.find((p) => p.character === c)!;
               const { w, h } = SHIRT_SIZE[c];
               return (
-                <Link key={c} href={productPath(c)} className={"finalKit " + c} aria-label={`${kit.name}, ${money(kit.price)}`}>
+                <Link key={c} href={productPath(c)} className={"finalKit " + c} aria-label={`${kit.name}, ${kit.was ? `was ${money(kit.was)}, now ` : ""}${money(kit.price)}`}>
                   <img src={shirtSrc(SHIRTS[c][0].id, 640)} width={w} height={h} alt="" loading="lazy" />
                   <span className="finalKitText">
                     <b>{kit.name}</b>
                     <small>{kit.sub}</small>
                   </span>
-                  <span className="finalKitPrice">{money(kit.price)}</span>
+                  <span className="finalKitPrice">{kit.was ? <s>{money(kit.was)}</s> : null} {money(kit.price)}</span>
                   <span className="finalKitGo" aria-hidden="true">
                     →
                   </span>

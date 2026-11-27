@@ -16,17 +16,12 @@ export const KITS = {
 } as const;
 
 /**
- * The Christmas offer. Set both env vars (and create the same code in the admin's Promotions
- * page) and the pop-up, banner and button say "Special Christmas offer" with the code.
- * Leave them unset and the layer stays gift-only: it never advertises a discount that
- * does not exist.   NEXT_PUBLIC_XMAS_CODE=XMAS10   NEXT_PUBLIC_XMAS_OFFER="10% off"
+ * The Christmas offer: no code. The saving is shown as the struck-through "was" price on every
+ * kit (see COMPARE_AT_MARKUP in lib/catalog.ts), so the pop-up, banner and button only name it.
+ * Change the wording with NEXT_PUBLIC_XMAS_OFFER="25% off"; set it to "off" for a gift-only layer.
  */
-const code = (process.env.NEXT_PUBLIC_XMAS_CODE ?? "").trim().toUpperCase();
-const text = (process.env.NEXT_PUBLIC_XMAS_OFFER ?? "").trim();
-export const OFFER = { code, text, on: Boolean(code && text) } as const;
-
-/** sessionStorage key the checkout reads to pre-fill the promo box. */
-export const PROMO_PREFILL_KEY = "pw:promo-code";
+const text = (process.env.NEXT_PUBLIC_XMAS_OFFER ?? "25% off").trim();
+export const OFFER = { text, on: text !== "" && text.toLowerCase() !== "off" } as const;
 
 /** localStorage keys */
 export const POPUP_KEY = "pw:xmas-popup";
