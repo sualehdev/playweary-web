@@ -73,7 +73,8 @@ export default function ChristmasLayer() {
     return () => clearTimeout(t);
   }, [decorated]);
 
-  // the pop-up: once per visit, on the home page or a product page, never over the cookie notice
+  // the pop-up opens by itself once per visit, on the home page only, never over the cookie notice.
+  // It counts as seen the moment it opens, so leaving it open and moving on never brings it back.
   useEffect(() => {
     if (!decorated || !POPUP_ROUTES(path) || seen(POPUP_KEY, true)) return;
     let tick: ReturnType<typeof setInterval> | undefined;
@@ -81,6 +82,8 @@ export default function ChristmasLayer() {
       tick = setInterval(() => {
         if (document.querySelector(".ckBanner")) return;
         clearInterval(tick);
+        if (seen(POPUP_KEY, true)) return;
+        remember(POPUP_KEY, true);
         setPopup(true);
       }, 1500);
     }, 7000);

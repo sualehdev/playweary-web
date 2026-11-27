@@ -38,4 +38,4 @@ export function isXmasActive(now: Date, flag: string | undefined = process.env.N
 /** Routes with no decoration at all: keep the buying steps calm. */
 export const QUIET_ROUTES = ["/checkout", "/thank-you"];
 /** Routes where the gift pop-up may appear on its own. */
-export const POPUP_ROUTES = (path: string) => path === "/" || path.startsWith("/products/");
+export const POPUP_ROUTES = (path: string) => path === "/";
